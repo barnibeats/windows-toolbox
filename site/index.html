@@ -1,0 +1,1272 @@
+<!doctype html>
+<!-- windows-toolbox-page: the desktop app only accepts a remote update that contains this marker -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Windows Toolbox</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#07080f; --bg2:#0e1020; --card:rgba(255,255,255,.045); --card-h:rgba(255,255,255,.08);
+  --border:rgba(255,255,255,.09); --text:#e8eaf6; --muted:#9097b8;
+  --a1:#7c5cff; --a2:#00d4ff; --a3:#ff4fd8; --ok:#3ddc97;
+}
+:root[data-theme="light"]{
+  --bg:#f4f6ff; --bg2:#e9ecff; --card:rgba(255,255,255,.75); --card-h:#fff;
+  --border:rgba(20,30,80,.10); --text:#141833; --muted:#5a6185;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:Inter,system-ui,sans-serif;background:var(--bg);color:var(--text);line-height:1.55;overflow-x:hidden;transition:background .4s,color .4s}
+a{color:inherit;text-decoration:none}
+
+/* animated background */
+.bg{position:fixed;inset:0;z-index:-2;overflow:hidden}
+.blob{position:absolute;width:520px;height:520px;border-radius:50%;filter:blur(110px);opacity:.38;animation:float 22s ease-in-out infinite}
+.blob.b1{background:var(--a1);top:-120px;left:-120px}
+.blob.b2{background:var(--a2);bottom:-160px;right:-100px;animation-delay:-7s}
+.blob.b3{background:var(--a3);top:40%;left:45%;width:380px;height:380px;animation-delay:-14s;opacity:.22}
+@keyframes float{0%,100%{transform:translate(0,0) scale(1)}33%{transform:translate(120px,80px) scale(1.15)}66%{transform:translate(-80px,140px) scale(.9)}}
+.grid-bg{position:fixed;inset:0;z-index:-1;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:56px 56px;mask-image:radial-gradient(ellipse at 50% 0%,#000 30%,transparent 75%)}
+
+/* hero */
+header{max-width:1180px;margin:0 auto;padding:90px 16px 40px;text-align:center}
+.logo{display:inline-grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:28px;animation:spinIn 1.2s cubic-bezier(.2,.8,.2,1)}
+.logo span{width:30px;height:30px;border-radius:5px;background:linear-gradient(135deg,var(--a1),var(--a2))}
+.logo span:nth-child(2){background:linear-gradient(135deg,var(--a2),var(--ok))}
+.logo span:nth-child(3){background:linear-gradient(135deg,var(--a3),var(--a1))}
+.logo span:nth-child(4){background:linear-gradient(135deg,#ffb84f,var(--a3))}
+@keyframes spinIn{from{transform:rotate(-180deg) scale(0);opacity:0}to{transform:none;opacity:1}}
+h1{font-size:clamp(2.2rem,6vw,4.2rem);font-weight:800;letter-spacing:-.03em;line-height:1.05}
+.grad{background:linear-gradient(90deg,var(--a1),var(--a2),var(--a3),var(--a1));background-size:300% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:shine 8s linear infinite}
+@keyframes shine{to{background-position:300% 0}}
+.sub{color:var(--muted);max-width:640px;margin:18px auto 0;font-size:1.08rem}
+.stats{display:flex;justify-content:center;gap:34px;margin-top:34px;flex-wrap:wrap}
+.stat b{display:block;font-size:2rem;font-weight:800}
+.stat small{color:var(--muted)}
+
+/* nav */
+nav{position:sticky;top:0;z-index:20;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);background:color-mix(in srgb,var(--bg) 70%,transparent);border-bottom:1px solid var(--border)}
+.nav-in{max-width:1180px;margin:0 auto;padding:10px 16px;display:flex;gap:8px 10px;align-items:center;justify-content:center;flex-wrap:wrap}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;flex:1 1 100%;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{white-space:nowrap;padding:8px 14px;border-radius:999px;border:1px solid var(--border);background:var(--card);color:var(--muted);font:500 .9rem Inter;cursor:pointer;transition:.25s}
+.tab:hover{color:var(--text);transform:translateY(-1px)}
+.tab.on{background:linear-gradient(135deg,var(--a1),var(--a2));color:#fff;border-color:transparent;box-shadow:0 6px 20px -6px var(--a1)}
+.search{position:relative;flex:0 1 420px;min-width:180px}
+.search input{width:100%;padding:9px 14px 9px 36px;border-radius:999px;border:1px solid var(--border);background:var(--card);color:var(--text);font:inherit;outline:none;transition:.25s}
+.search input:focus{border-color:var(--a2);box-shadow:0 0 0 4px color-mix(in srgb,var(--a2) 20%,transparent)}
+.search svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);opacity:.6}
+.theme{width:38px;height:38px;border-radius:50%;border:1px solid var(--border);background:var(--card);color:var(--text);cursor:pointer;font-size:1.05rem;transition:transform .5s}
+.theme:hover{transform:rotate(180deg)}
+
+/* sections */
+main{max-width:1180px;margin:0 auto;padding:30px 16px 80px}
+section{margin-top:56px;scroll-margin-top:130px}
+.sec-h{display:flex;align-items:center;gap:14px;margin-bottom:6px}
+.sec-ic{font-size:1.7rem;width:52px;height:52px;display:grid;place-items:center;border-radius:14px;background:linear-gradient(135deg,color-mix(in srgb,var(--a1) 35%,transparent),color-mix(in srgb,var(--a2) 25%,transparent));border:1px solid var(--border)}
+h2{font-size:1.75rem;letter-spacing:-.02em}
+.sec-d{color:var(--muted);margin:4px 0 6px 66px}
+h3{font-size:.85rem;text-transform:uppercase;letter-spacing:.12em;color:var(--a2);margin:30px 0 14px;display:flex;align-items:center;gap:10px}
+h3::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,var(--border),transparent)}
+
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px}
+.card{position:relative;display:block;padding:18px 18px 16px;border-radius:16px;background:var(--card);border:1px solid var(--border);overflow:hidden;transition:transform .35s cubic-bezier(.2,.8,.2,1),background .3s,border-color .3s,box-shadow .35s;opacity:0;transform:translateY(24px)}
+.card.vis{opacity:1;transform:none}
+.card::before{content:"";position:absolute;inset:0;background:radial-gradient(400px circle at var(--mx,50%) var(--my,50%),color-mix(in srgb,var(--a1) 22%,transparent),transparent 45%);opacity:0;transition:opacity .3s}
+.card:hover{transform:translateY(-4px);background:var(--card-h);border-color:color-mix(in srgb,var(--a1) 50%,var(--border));box-shadow:0 18px 40px -18px color-mix(in srgb,var(--a1) 60%,transparent)}
+.card:hover::before{opacity:1}
+.card-t{position:relative;display:flex;align-items:center;justify-content:space-between;gap:8px;font-weight:600;font-size:1.02rem}
+.card-t .arr{opacity:.4;transition:.3s;font-size:.95rem}
+.card:hover .arr{opacity:1;transform:translate(3px,-3px);color:var(--a2)}
+.card p{position:relative;color:var(--muted);font-size:.9rem;margin-top:6px}
+.host{position:relative;display:inline-block;margin-top:10px;font:500 .72rem "JetBrains Mono";color:var(--muted);padding:2px 8px;border-radius:6px;border:1px solid var(--border)}
+.card{display:flex;flex-direction:column}
+.card .host{align-self:flex-start}
+
+/* edit mode */
+.edit{height:38px;padding:0 14px;border-radius:999px;border:1px solid var(--border);background:var(--card);color:var(--text);font:600 .88rem Inter;cursor:pointer;transition:.25s;white-space:nowrap}
+.edit:hover{border-color:var(--a2)}
+.edit.on{background:linear-gradient(135deg,#ff9f43,var(--a3));color:#fff;border-color:transparent;box-shadow:0 6px 20px -6px var(--a3)}
+.editbar{display:none;max-width:1180px;margin:0 auto;padding:0 16px 10px;align-items:center;justify-content:center;gap:8px 14px;flex-wrap:wrap;font-size:.88rem;color:var(--muted)}
+body.editing .editbar{display:flex;animation:slideDown .3s ease}
+@keyframes slideDown{from{opacity:0;transform:translateY(-8px)}}
+.editbar .btns{display:flex;gap:8px;flex-wrap:wrap}
+.editbar .btn{flex:0 0 auto;padding:6px 12px}
+.btn.danger:hover{border-color:#ff4d6d;color:#ff4d6d}
+.rm{position:absolute;top:10px;right:10px;z-index:3;width:28px;height:28px;border-radius:50%;border:1px solid var(--border);background:var(--bg2);color:var(--muted);cursor:pointer;display:none;place-items:center;font-size:.85rem;transition:.25s}
+.rm:hover{background:#ff4d6d;color:#fff;border-color:transparent;transform:rotate(90deg)}
+body.editing .rm{display:grid}
+body.editing .card-t .arr{visibility:hidden}
+body.editing .card{border-style:dashed}
+.mine-tag{font:600 .64rem Inter;padding:2px 7px;border-radius:999px;background:color-mix(in srgb,var(--a3) 22%,transparent);color:var(--a3);margin-left:8px;vertical-align:2px;letter-spacing:.02em}
+.card.out{animation:cardOut .3s forwards;pointer-events:none}
+@keyframes cardOut{to{opacity:0;transform:scale(.85)}}
+.card.new{animation:cardPop .5s cubic-bezier(.2,.8,.2,1)}
+@keyframes cardPop{0%{opacity:0;transform:scale(.85)}60%{transform:scale(1.03)}100%{opacity:1;transform:none}}
+.add-card{display:none;min-height:170px;border-radius:16px;border:2px dashed color-mix(in srgb,var(--a2) 45%,var(--border));background:transparent;color:var(--a2);font:600 .92rem Inter;cursor:pointer;flex-direction:column;align-items:center;justify-content:center;gap:8px;transition:.25s}
+.add-card b{font-size:2rem;line-height:1;font-weight:400;transition:transform .3s}
+.add-card:hover{background:color-mix(in srgb,var(--a2) 8%,transparent);transform:translateY(-3px)}
+.add-card:hover b{transform:rotate(90deg)}
+body.editing .add-card{display:flex}
+body:not(.editing) .group:not(:has(.card)){display:none}
+
+dialog{margin:auto;border:1px solid var(--border);border-radius:20px;padding:0;background:var(--bg2);color:var(--text);width:min(540px,calc(100vw - 32px));box-shadow:0 30px 80px -20px rgba(0,0,0,.6)}
+dialog[open]{animation:cardPop .35s cubic-bezier(.2,.8,.2,1)}
+dialog::backdrop{background:rgba(5,6,12,.6);backdrop-filter:blur(6px)}
+dialog form{padding:24px;display:grid;gap:14px}
+dialog h2{font-size:1.3rem}
+dialog label{display:grid;gap:6px;font-size:.85rem;color:var(--muted)}
+dialog [hidden]{display:none}
+dialog input,dialog select{padding:10px 12px;border-radius:10px;border:1px solid var(--border);background:var(--bg);color:var(--text);font:inherit;outline:none;width:100%}
+dialog input:focus,dialog select:focus{border-color:var(--a2);box-shadow:0 0 0 3px color-mix(in srgb,var(--a2) 20%,transparent)}
+dialog .row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+dialog .hint{font:500 .75rem "JetBrains Mono";color:var(--muted);min-height:1em;margin-top:-8px}
+dialog .hint.ok{color:var(--ok)}
+dialog .err{color:#ff6b81;font-size:.85rem;min-height:1em}
+dialog .dlg-acts{display:flex;gap:10px;justify-content:flex-end}
+dialog .dlg-acts .btn{flex:0 0 auto;padding:10px 18px}
+
+.toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,30px);opacity:0;pointer-events:none;z-index:50;display:flex;gap:14px;align-items:center;padding:10px 10px 10px 18px;border-radius:14px;background:var(--bg2);border:1px solid var(--border);box-shadow:0 20px 50px -15px rgba(0,0,0,.6);transition:.3s;font-size:.9rem;max-width:calc(100vw - 32px)}
+.toast.show{opacity:1;transform:translate(-50%,0);pointer-events:auto}
+.toast button{padding:7px 14px;border-radius:9px;border:none;cursor:pointer;font:600 .85rem Inter;color:#fff;background:linear-gradient(135deg,var(--a1),var(--a2))}
+@media (max-width:600px){ dialog .row{grid-template-columns:1fr} }
+
+.upd{position:fixed;left:50%;top:14px;transform:translateX(-50%);z-index:60;display:flex;align-items:center;gap:12px;padding:8px 8px 8px 18px;border-radius:14px;background:var(--bg2);border:1px solid color-mix(in srgb,var(--a2) 50%,var(--border));box-shadow:0 20px 50px -15px color-mix(in srgb,var(--a1) 70%,transparent);font-size:.9rem;max-width:calc(100vw - 32px);flex-wrap:wrap;animation:slideDown .4s ease}
+.upd[hidden]{display:none}
+.upd .btn{flex:0 0 auto;padding:7px 14px}
+.upd-x{width:30px;height:30px;border-radius:50%;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer}
+#ver{opacity:.7;font:500 .75rem "JetBrains Mono"}
+.card-t a::after{content:"";position:absolute;inset:0;z-index:1}
+.card-t a:focus-visible{outline:none}
+.card:has(.card-t a:focus-visible){border-color:var(--a2)}
+.acts{position:relative;z-index:2;display:flex;gap:8px;margin-top:auto;padding-top:14px}
+.btn{flex:1;display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:8px 10px;border-radius:10px;font:600 .82rem Inter;cursor:pointer;border:1px solid var(--border);background:var(--bg2);color:var(--text);transition:transform .2s,box-shadow .25s,background .25s,border-color .25s;white-space:nowrap}
+.btn:hover{transform:translateY(-1px);border-color:var(--a2)}
+.btn.dl{border-color:transparent;color:#fff;background:linear-gradient(135deg,var(--a1),var(--a2));background-size:150% 150%;box-shadow:0 6px 18px -8px var(--a1)}
+.btn.dl:hover{box-shadow:0 10px 26px -8px var(--a2);background-position:100% 0}
+.btn.dl .ic{display:inline-block;transition:transform .3s}
+.btn.dl:hover .ic{animation:bounce .7s ease infinite}
+@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(3px)}}
+.btn.dl.busy{pointer-events:none;opacity:.85}
+.btn.dl.busy .ic{animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.btn.dl.ok{background:linear-gradient(135deg,#2bb673,var(--ok));color:#05210f}
+.btn.dl.alt{background:linear-gradient(135deg,#ff9f43,#ffb84f);color:#2a1600}
+.st{position:relative;z-index:2;min-height:0;font:500 .72rem "JetBrains Mono";color:var(--muted);margin-top:0;max-height:0;overflow:hidden;transition:max-height .3s,margin-top .3s;word-break:break-all}
+.st.show{max-height:60px;margin-top:8px}
+
+/* hotkeys */
+.keys{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:10px}
+.key{display:flex;align-items:center;gap:14px;padding:12px 16px;border-radius:14px;background:var(--card);border:1px solid var(--border);opacity:0;transform:translateY(24px);transition:.5s cubic-bezier(.2,.8,.2,1)}
+.key.vis{opacity:1;transform:none}
+.combo{display:flex;gap:4px;flex-wrap:wrap;flex-shrink:0}
+kbd{font:600 .78rem "JetBrains Mono";padding:4px 8px;border-radius:7px;background:var(--bg2);border:1px solid var(--border);border-bottom-width:3px;box-shadow:0 2px 0 rgba(0,0,0,.2)}
+.key span{color:var(--muted);font-size:.9rem}
+
+.tips{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px}
+.tip{padding:18px;border-radius:16px;background:var(--card);border:1px solid var(--border);opacity:0;transform:translateY(24px);transition:.5s cubic-bezier(.2,.8,.2,1)}
+.tip.vis{opacity:1;transform:none}
+.tip b{display:block;margin-bottom:6px}
+.tip span{color:var(--muted);font-size:.9rem}
+code{font-family:"JetBrains Mono";font-size:.82em;padding:1px 6px;border-radius:5px;background:var(--bg2);border:1px solid var(--border);word-break:break-all}
+
+.cmds{display:grid;gap:12px}
+.cmd{border-radius:14px;border:1px solid var(--border);background:var(--bg2);overflow:hidden;opacity:0;transform:translateY(24px);transition:.5s cubic-bezier(.2,.8,.2,1)}
+.cmd.vis{opacity:1;transform:none}
+.cmd-h{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;border-bottom:1px solid var(--border);color:var(--muted);font-size:.88rem}
+.cmd-h .dots{display:flex;gap:6px;margin-right:10px}
+.cmd-h .dots i{width:10px;height:10px;border-radius:50%;background:#ff5f57}
+.cmd-h .dots i:nth-child(2){background:#febc2e}.cmd-h .dots i:nth-child(3){background:#28c840}
+.copy{font:500 .8rem Inter;padding:5px 12px;border-radius:8px;border:1px solid var(--border);background:var(--card);color:var(--text);cursor:pointer;transition:.2s}
+.copy:hover{border-color:var(--a2)}
+.copy.done{background:var(--ok);color:#06210f;border-color:transparent}
+pre{padding:14px 16px;overflow-x:auto;font:400 .86rem/1.6 "JetBrains Mono";color:var(--a2)}
+
+.warn{display:grid;gap:10px;counter-reset:w}
+.warn li{list-style:none;position:relative;padding:14px 16px 14px 58px;border-radius:14px;background:var(--card);border:1px solid var(--border);opacity:0;transform:translateX(-20px);transition:.5s}
+.warn li.vis{opacity:1;transform:none}
+.warn li::before{counter-increment:w;content:counter(w);position:absolute;left:16px;top:50%;transform:translateY(-50%);width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:.85rem;background:linear-gradient(135deg,#ffb84f,var(--a3));color:#fff}
+
+.note{margin-top:14px;padding:12px 16px;border-radius:12px;border:1px dashed color-mix(in srgb,#ffb84f 60%,transparent);color:var(--muted);font-size:.9rem}
+.empty{display:none;text-align:center;color:var(--muted);padding:60px 0;font-size:1.1rem}
+.hidden{display:none!important}
+
+footer{text-align:center;color:var(--muted);font-size:.85rem;padding:30px 16px 50px}
+.top{position:fixed;right:20px;bottom:20px;width:46px;height:46px;border-radius:50%;border:none;cursor:pointer;background:linear-gradient(135deg,var(--a1),var(--a2));color:#fff;font-size:1.2rem;box-shadow:0 10px 30px -8px var(--a1);opacity:0;transform:translateY(20px);transition:.3s;pointer-events:none}
+.top.show{opacity:1;transform:none;pointer-events:auto}
+#progress{position:fixed;top:0;left:0;height:3px;width:0;z-index:30;background:linear-gradient(90deg,var(--a1),var(--a2),var(--a3))}
+
+@media (max-width:600px){
+  header{padding-top:60px}
+  .sec-d{margin-left:0}
+  .keys{grid-template-columns:1fr}
+  .key{flex-direction:column;align-items:flex-start;gap:8px}
+  .tabs{flex-wrap:nowrap;justify-content:flex-start;overflow-x:auto}
+  .search{flex:1 1 auto}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before{animation:none!important;transition:none!important}
+  .card,.key,.tip,.cmd,.warn li{opacity:1;transform:none}
+}
+
+/* language switch */
+.lang{display:flex;gap:2px;padding:3px;border-radius:999px;border:1px solid var(--border);background:var(--card)}
+.lang button{border:none;background:transparent;color:var(--muted);font:600 .78rem Inter;letter-spacing:.04em;padding:7px 10px;border-radius:999px;cursor:pointer;transition:.25s}
+.lang button:hover{color:var(--text)}
+.lang button.on{background:linear-gradient(135deg,var(--a1),var(--a2));color:#fff;box-shadow:0 4px 14px -6px var(--a1)}
+main.swap{animation:langSwap .35s ease}
+@keyframes langSwap{from{opacity:.25;transform:translateY(6px)}}
+
+/* the hidden attribute always wins over component display rules (.btn, label, …) */
+[hidden]{display:none!important}
+
+/* card facts: stars, version, date, badges */
+.meta{position:relative;display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:10px}
+.card .meta .host{margin-top:0}
+.chip{font:500 .72rem "JetBrains Mono";color:var(--muted);padding:2px 8px;border-radius:6px;background:color-mix(in srgb,var(--text) 6%,transparent);white-space:nowrap}
+.chip.warn{color:#ffb84f;background:color-mix(in srgb,#ffb84f 15%,transparent)}
+.chip.inst{color:var(--ok);background:color-mix(in srgb,var(--ok) 15%,transparent)}
+
+/* install via winget (desktop app only): it takes its own full-width row under GitHub + Download */
+.acts{flex-wrap:wrap}
+.acts .btn{min-width:0}
+.acts .btn .lb{overflow:hidden;text-overflow:ellipsis}
+.btn.inst{flex:1 1 100%}
+.acts .btn.gh{flex:0 0 auto;padding:8px 14px}
+.btn.gh.compact{flex:0 0 40px;padding:8px 0}
+.btn.inst{border-color:color-mix(in srgb,var(--ok) 55%,var(--border));color:var(--ok)}
+.btn.inst:hover{background:color-mix(in srgb,var(--ok) 12%,transparent);border-color:var(--ok)}
+.btn.inst.done{opacity:.7;cursor:default;transform:none}
+.btn.inst.upg{border-color:#ffb84f;color:#ffb84f}
+.btn.inst.busy{pointer-events:none}
+.btn.inst.busy .ic{display:inline-block;animation:spin .8s linear infinite}
+.btn.inst.err{border-color:#ff6b81;color:#ff6b81}
+
+/* select mode + sets */
+.pick{position:absolute;top:10px;right:10px;z-index:3;display:none;width:26px;height:26px}
+.pick input{position:absolute;inset:0;margin:0;opacity:0;cursor:pointer}
+.pick span{display:grid;place-items:center;width:26px;height:26px;border-radius:8px;border:2px solid var(--border);background:var(--bg2);transition:.2s;pointer-events:none}
+.pick input:checked + span{background:linear-gradient(135deg,var(--a1),var(--a2));border-color:transparent}
+.pick input:checked + span::after{content:"✓";color:#fff;font-weight:800;font-size:.85rem}
+.pick input:focus-visible + span{outline:2px solid var(--a2);outline-offset:2px}
+body.selecting .pick{display:block}
+body.selecting .card-t .arr{visibility:hidden}
+body.selecting .card.picked{border-color:color-mix(in srgb,var(--a2) 70%,transparent);background:color-mix(in srgb,var(--a2) 7%,var(--card))}
+.edit.sel.on{background:linear-gradient(135deg,var(--a1),var(--a2));box-shadow:0 6px 20px -6px var(--a1)}
+.selbar{position:fixed;left:50%;bottom:20px;transform:translate(-50%,40px);opacity:0;pointer-events:none;z-index:45;display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:8px;padding:10px 12px;border-radius:16px;background:var(--bg2);border:1px solid var(--border);box-shadow:0 20px 50px -15px rgba(0,0,0,.6);transition:.3s;max-width:calc(100vw - 32px)}
+body.selecting .selbar{opacity:1;transform:translate(-50%,0);pointer-events:auto}
+.selbar b{padding:0 6px;font-size:.9rem;white-space:nowrap}
+.selbar .btn{flex:0 0 auto;padding:8px 12px}
+.selbar .btn[disabled]{opacity:.45;pointer-events:none}
+body.selecting .toast{bottom:100px}
+body.selecting .top{bottom:100px}
+
+/* offline notice */
+.offline{position:fixed;left:50%;top:14px;transform:translateX(-50%);z-index:61;padding:8px 16px;border-radius:12px;background:#3a1d24;color:#ffd5dc;border:1px solid #ff6b81;font-size:.88rem;max-width:calc(100vw - 32px);text-align:center;animation:slideDown .3s ease}
+:root[data-theme="light"] .offline{background:#ffe9ed;color:#7a1026}
+.offline[hidden]{display:none}
+
+/* sets & script dialogs */
+.setlist{display:grid;gap:8px;max-height:45vh;overflow:auto}
+.setrow{display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:12px;border:1px solid var(--border);background:var(--bg)}
+.setrow span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.setrow small{color:var(--muted);white-space:nowrap}
+.setrow .btn{flex:0 0 auto;padding:6px 10px}
+dialog textarea{width:100%;min-height:230px;padding:12px;border-radius:10px;border:1px solid var(--border);background:var(--bg);color:var(--a2);font:400 .8rem/1.5 "JetBrains Mono";resize:vertical;outline:none}
+dialog .muted{color:var(--muted);font-size:.85rem}
+dialog .inline{display:flex;gap:8px}
+dialog .inline input{flex:1}
+dialog .inline .btn{flex:0 0 auto}
+</style>
+</head>
+<body>
+<div id="progress"></div>
+<div class="bg"><div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div></div>
+<div class="grid-bg"></div>
+<div class="offline" id="offline" role="status" hidden data-i18n="offline"></div>
+
+<header>
+  <div class="logo"><span></span><span></span><span></span><span></span></div>
+  <h1><span data-i18n="h1"></span> <span class="grad">Windows</span></h1>
+  <p class="sub" data-i18n="sub"></p>
+  <div class="stats">
+    <div class="stat"><b data-count="apps">0</b><small data-i18n="statApps"></small></div>
+    <div class="stat"><b data-count="keys">0</b><small data-i18n="statKeys"></small></div>
+    <div class="stat"><b data-count="secs">0</b><small data-i18n="statSecs"></small></div>
+  </div>
+</header>
+
+<nav>
+  <div class="nav-in">
+    <div class="tabs" id="tabs"></div>
+    <label class="search">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <input id="q" type="search" data-i18n-ph="searchPh" autocomplete="off">
+    </label>
+    <div class="lang" id="lang" role="group" aria-label="Language">
+      <button type="button" data-l="en">EN</button><button type="button" data-l="uk">UA</button><button type="button" data-l="ru">RU</button>
+    </div>
+    <button class="edit sel" id="selBtn" data-i18n-title="selectTitle"></button>
+    <button class="edit" id="editBtn" data-i18n-title="editTitle"></button>
+    <button class="theme" id="theme" data-i18n-title="themeTitle">☾</button>
+  </div>
+  <div class="editbar">
+    <span id="editInfo"></span>
+    <div class="btns">
+      <button class="btn" id="expBtn" data-i18n="exp" data-i18n-title="expTitle"></button>
+      <button class="btn" id="impBtn" data-i18n="imp" data-i18n-title="impTitle"></button>
+      <button class="btn danger" id="resetBtn" data-i18n="reset" data-i18n-title="resetTitle"></button>
+    </div>
+    <input type="file" id="impFile" accept=".json,application/json" hidden>
+  </div>
+</nav>
+
+<main id="main"></main>
+<div class="empty" id="empty" data-i18n="empty"></div>
+
+<div class="selbar" id="selbar">
+  <b id="selCount"></b>
+  <button class="btn dl" id="selInstall" type="button"></button>
+  <button class="btn" id="selScript" type="button" data-i18n="script"></button>
+  <button class="btn" id="selSave" type="button" data-i18n="saveSet"></button>
+  <button class="btn" id="selShare" type="button" data-i18n="share"></button>
+  <button class="btn" id="selSets" type="button" data-i18n="sets"></button>
+  <button class="btn danger" id="selClear" type="button" data-i18n="clear"></button>
+</div>
+
+<div class="upd" id="upd" hidden>
+  <span id="updMsg"></span>
+  <a class="btn dl" id="updLink" href="#" target="_blank" rel="noopener" hidden><span class="ic">⬇</span><span data-i18n="download"></span></a>
+  <button class="btn dl" id="updRestart" type="button" hidden data-i18n="restart"></button>
+  <button class="upd-x" id="updX" type="button" data-i18n-title="hide">✕</button>
+</div>
+
+<footer><span data-i18n="footer"></span><br><span id="ver"></span></footer>
+<button class="top" id="top" data-i18n-title="toTop">↑</button>
+<div class="toast" id="toast" role="status"></div>
+
+<dialog id="addDlg">
+  <form id="addForm" novalidate>
+    <h2 data-i18n="dlgTitle"></h2>
+    <label><span data-i18n="dlgSrc"></span>
+      <input name="src" placeholder="https://github.com/microsoft/PowerToys" autocomplete="off" required>
+    </label>
+    <div class="hint" id="ghHint"></div>
+    <label><span data-i18n="dlgName"></span><input name="n" autocomplete="off" required></label>
+    <label><span data-i18n="dlgDesc"></span><input name="d" maxlength="90" autocomplete="off" data-i18n-ph="dlgDescPh"></label>
+    <div class="row">
+      <label><span data-i18n="dlgSec"></span><select name="sec"></select></label>
+      <label><span data-i18n="dlgGroup"></span><select name="group"></select></label>
+    </div>
+    <label id="newGroupL" hidden><span data-i18n="dlgNewGroup"></span><input name="newGroup" autocomplete="off"></label>
+    <div class="err" id="addErr"></div>
+    <div class="dlg-acts">
+      <button type="button" class="btn" id="addCancel" data-i18n="cancel"></button>
+      <button type="submit" class="btn dl" data-i18n="add"></button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="setsDlg">
+  <form method="dialog">
+    <h2 data-i18n="setsTitle"></h2>
+    <div class="setlist" id="setList"></div>
+    <label><span data-i18n="importSet"></span>
+      <span class="inline"><input id="setImport" autocomplete="off" placeholder="https://…#set=…"><button type="button" class="btn" id="setImportBtn" data-i18n="openSet"></button></span>
+    </label>
+    <div class="err" id="setErr"></div>
+    <div class="dlg-acts"><button class="btn" data-i18n="closeDlg"></button></div>
+  </form>
+</dialog>
+
+<dialog id="scriptDlg">
+  <form method="dialog">
+    <h2 data-i18n="scriptTitle"></h2>
+    <p class="muted" data-i18n="scriptHint"></p>
+    <textarea id="scriptText" readonly spellcheck="false"></textarea>
+    <div class="dlg-acts">
+      <button type="button" class="btn" id="scriptCopy" data-i18n="copy"></button>
+      <button type="button" class="btn dl" id="scriptSave" data-i18n="saveScript"></button>
+      <button class="btn" data-i18n="closeDlg"></button>
+    </div>
+  </form>
+</dialog>
+
+<!-- filled by tools/build.mjs from catalog.json / downloads.json; empty in the source file -->
+<script id="catalog-data" type="application/json"></script>
+<script id="downloads-data" type="application/json"></script>
+
+<script>
+(async () => {
+// ===== settings ==========================================================================
+const REPO = "barnibeats/windows-toolbox";   // repo with app releases
+const SITE = "https://barnibeats.github.io/windows-toolbox/";   // web version, used in share links
+const EDITING_ENABLED = false;                // true → the edit button and personal edits are back
+const DEFAULT_LANG = "en";                    // used until the visitor picks a language
+// ========================================================================================
+const GH = "https://github.com/";
+const LANGS = ["en", "uk", "ru"];
+const params = new URLSearchParams(location.search);
+
+// ----- interface strings -----------------------------------------------------------------
+const UI = {
+ en: {
+  h1: "The best for", sub: "Open-source apps from GitHub, hidden features and handy commands: personalization, gaming, administration and fine-tuning your system.",
+  statApps: "apps", statKeys: "hotkeys", statSecs: "sections", searchPh: "Search apps…",
+  editTitle: "Remove or add cards", edit: "✎ Edit", done: "✓ Done", themeTitle: "Toggle theme",
+  exp: "⇩ Export", expTitle: "Save your changes to a file", imp: "⇧ Import", impTitle: "Load changes from a file",
+  reset: "↺ Reset", resetTitle: "Restore the original list", empty: "Nothing found 🤷",
+  download: "Download", hide: "Hide", toTop: "Back to top",
+  footer: "Always check the date of the latest release in the repository before installing.",
+  appVersion: "App v{0}",
+  dlgTitle: "New app", dlgSrc: "GitHub link or “owner/repository”", dlgName: "Name", dlgDesc: "Description",
+  dlgDescPh: "In short: what the app does", dlgSec: "Section", dlgGroup: "Group", dlgNewGroup: "New group name",
+  newGroupOpt: "＋ New group…", cancel: "Cancel", add: "Add", closeDlg: "Close",
+  github: "GitHub", site: "Website", dl: "Download", dlTitle: "Download the latest Windows version",
+  dlBusy: "Looking…", dlOk: "Downloading", dlOpen: "Opened", mb: "MB",
+  nSite: "No GitHub releases — opening the download site", nOrg: "Pick a repository on the organization page",
+  nLimit: "GitHub API limit reached — opening releases", nNoWin: "No ready-made Windows file — opening releases",
+  nOffline: "Can't reach the GitHub API — opening releases", nNoNet: "No internet connection",
+  hotkeys: "Hotkeys", hidden: "Hidden features", cmds: "Handy commands (terminal as administrator)",
+  copy: "Copy", copied: "Copied ✓", mine: "mine", removeCard: "Remove card",
+  editHint: "Click ✕ on a card to remove it, or “+” to add an app", editStats: "Your changes: {0} removed, {1} added",
+  addCard: "Add app", removed: "Removed: {0}", added: "Added: {0}", undo: "Undo",
+  exported: "toolbox-edits.json saved to Downloads", importErr: "Couldn't read the file — is it an export from this app?",
+  resetNone: "No changes — the list is already original", resetConfirm: "Restore the original list? Removed cards come back, cards you added are deleted.",
+  ghLooking: "Looking it up on GitHub…", gh404: "Repository not found — check the link", ghFail: "GitHub didn't respond, fill in the fields manually",
+  ghOffline: "No connection to GitHub, fill in the fields manually", ghPlain: "Plain link: the Download button will open this site", archived: "archived",
+  errSrc: "Enter a GitHub link, “owner/repository” or a website address", errName: "Enter a name", errGroup: "Enter a name for the new group",
+  errDup: "“{0}” is already on the page", addedManually: "Added manually",
+  starsTitle: "GitHub stars", relTitle: "Latest release",
+  install: "Install", installTitle: "Install silently with winget", installed: "Installed", upgrade: "Update",
+  queued: "Queued", installing: "Installing…", installFail: "Failed ({0})", installDone: "{0} installed", installErr: "{0}: installation failed",
+  select: "☑ Select", selectDone: "✓ Done", selectTitle: "Pick several apps to install together or share as a set",
+  selCount: "Selected: {0}", installAll: "Install ({0})", script: "Script", saveSet: "Save set", share: "Share", sets: "Sets", clear: "Clear",
+  setName: "Name of the set:", setSaved: "Set “{0}” saved", setLoaded: "Set loaded: {0} apps", shareCopied: "Link copied — whoever opens it gets this set",
+  setsTitle: "Saved sets", setsEmpty: "No saved sets yet. Select apps and press “Save set”.", load: "Load", del: "Delete", appsN: "{0} apps",
+  importSet: "Open a shared set (link or code)", openSet: "Open", setBad: "That doesn't look like a set link", nothingSelected: "Select at least one app",
+  scriptTitle: "Install script (PowerShell + winget)", scriptHint: "Run it in PowerShell. Apps that aren't in winget are listed at the end — download those manually.",
+  saveScript: "Save .ps1", scriptCopied: "Script copied", notInWinget: "Not in winget, download manually:",
+  offline: "No internet connection — showing the saved version. Downloads and installs are unavailable.",
+  updAvail: "✨ Version {0} of the app is available", updDownloading: "⏳ Downloading update {0}…", updReady: "✨ Update {0} is ready — it will be installed when you close the app",
+  restart: "Restart now", confirmInstall: "Install with winget?"
+ },
+ uk: {
+  h1: "Найкраще для", sub: "Програми з відкритим кодом з GitHub, приховані функції та корисні команди: персоналізація, ігри, адміністрування й тонке налаштування системи.",
+  statApps: "програм", statKeys: "гарячих клавіш", statSecs: "розділів", searchPh: "Пошук програми…",
+  editTitle: "Прибрати або додати картки", edit: "✎ Редагувати", done: "✓ Готово", themeTitle: "Змінити тему",
+  exp: "⇩ Експорт", expTitle: "Зберегти ваші зміни у файл", imp: "⇧ Імпорт", impTitle: "Завантажити зміни з файлу",
+  reset: "↺ Скинути", resetTitle: "Повернути початковий список", empty: "Нічого не знайдено 🤷",
+  download: "Завантажити", hide: "Сховати", toTop: "Нагору",
+  footer: "Перед встановленням перевірте дату останнього релізу в репозиторії.",
+  appVersion: "Застосунок v{0}",
+  dlgTitle: "Нова програма", dlgSrc: "Посилання на GitHub або «власник/репозиторій»", dlgName: "Назва", dlgDesc: "Опис",
+  dlgDescPh: "Коротко: що робить програма", dlgSec: "Розділ", dlgGroup: "Група", dlgNewGroup: "Назва нової групи",
+  newGroupOpt: "＋ Нова група…", cancel: "Скасувати", add: "Додати", closeDlg: "Закрити",
+  github: "GitHub", site: "Сайт", dl: "Завантажити", dlTitle: "Завантажити останню версію для Windows",
+  dlBusy: "Шукаю файл…", dlOk: "Завантажується", dlOpen: "Відкрито", mb: "МБ",
+  nSite: "Немає релізів на GitHub — відкриваю сайт завантаження", nOrg: "Оберіть репозиторій на сторінці організації",
+  nLimit: "Ліміт GitHub API вичерпано — відкриваю релізи", nNoWin: "Готового файлу для Windows немає — відкриваю релізи",
+  nOffline: "Немає зв'язку з GitHub API — відкриваю релізи", nNoNet: "Немає підключення до інтернету",
+  hotkeys: "Гарячі клавіші", hidden: "Приховані функції", cmds: "Корисні команди (термінал від імені адміністратора)",
+  copy: "Копіювати", copied: "Скопійовано ✓", mine: "моє", removeCard: "Прибрати картку",
+  editHint: "Натисніть ✕ на картці, щоб прибрати її, або «+», щоб додати програму", editStats: "Ваші зміни: прибрано {0}, додано {1}",
+  addCard: "Додати програму", removed: "Прибрано: {0}", added: "Додано: {0}", undo: "Скасувати",
+  exported: "Файл toolbox-edits.json збережено в «Завантаження»", importErr: "Не вдалося прочитати файл — це точно експорт із цього застосунку?",
+  resetNone: "Змін немає — список уже початковий", resetConfirm: "Повернути початковий список? Прибрані картки повернуться, додані вами — видаляться.",
+  ghLooking: "Шукаю на GitHub…", gh404: "Репозиторій не знайдено — перевірте посилання", ghFail: "GitHub не відповів, заповніть поля вручну",
+  ghOffline: "Немає зв'язку з GitHub, заповніть поля вручну", ghPlain: "Звичайне посилання: кнопка «Завантажити» відкриє цей сайт", archived: "архівовано",
+  errSrc: "Вкажіть посилання на GitHub, «власник/репозиторій» або адресу сайту", errName: "Введіть назву", errGroup: "Введіть назву нової групи",
+  errDup: "«{0}» уже є на сторінці", addedManually: "Додано вручну",
+  starsTitle: "Зірки на GitHub", relTitle: "Останній реліз",
+  install: "Встановити", installTitle: "Тихо встановити через winget", installed: "Встановлено", upgrade: "Оновити",
+  queued: "У черзі", installing: "Встановлення…", installFail: "Помилка ({0})", installDone: "{0} встановлено", installErr: "{0}: не вдалося встановити",
+  select: "☑ Вибрати", selectDone: "✓ Готово", selectTitle: "Виберіть кілька програм, щоб встановити їх разом або поділитися набором",
+  selCount: "Вибрано: {0}", installAll: "Встановити ({0})", script: "Скрипт", saveSet: "Зберегти набір", share: "Поділитися", sets: "Набори", clear: "Очистити",
+  setName: "Назва набору:", setSaved: "Набір «{0}» збережено", setLoaded: "Набір завантажено: програм — {0}", shareCopied: "Посилання скопійовано — хто його відкриє, отримає цей набір",
+  setsTitle: "Збережені набори", setsEmpty: "Збережених наборів поки немає. Виберіть програми й натисніть «Зберегти набір».", load: "Відкрити", del: "Видалити", appsN: "програм: {0}",
+  importSet: "Відкрити набір, яким поділилися (посилання або код)", openSet: "Відкрити", setBad: "Це не схоже на посилання на набір", nothingSelected: "Виберіть хоча б одну програму",
+  scriptTitle: "Скрипт встановлення (PowerShell + winget)", scriptHint: "Запустіть його в PowerShell. Програми, яких немає у winget, перелічені в кінці — їх завантажте вручну.",
+  saveScript: "Зберегти .ps1", scriptCopied: "Скрипт скопійовано", notInWinget: "Немає у winget, завантажте вручну:",
+  offline: "Немає підключення до інтернету — показано збережену версію. Завантаження та встановлення недоступні.",
+  updAvail: "✨ Доступна версія застосунку {0}", updDownloading: "⏳ Завантажую оновлення {0}…", updReady: "✨ Оновлення {0} готове — воно встановиться, коли ви закриєте застосунок",
+  restart: "Перезапустити зараз", confirmInstall: "Встановити через winget?"
+ },
+ ru: {
+  h1: "Лучшее для", sub: "Открытые программы с GitHub, скрытые функции и полезные команды: персонализация, игры, администрирование и тонкая настройка системы.",
+  statApps: "программ", statKeys: "горячих клавиш", statSecs: "разделов", searchPh: "Поиск программы…",
+  editTitle: "Убрать или добавить карточки", edit: "✎ Редактировать", done: "✓ Готово", themeTitle: "Сменить тему",
+  exp: "⇩ Экспорт", expTitle: "Сохранить ваши изменения в файл", imp: "⇧ Импорт", impTitle: "Загрузить изменения из файла",
+  reset: "↺ Сбросить", resetTitle: "Вернуть исходный список", empty: "Ничего не найдено 🤷",
+  download: "Скачать", hide: "Скрыть", toTop: "Наверх",
+  footer: "Перед установкой проверьте дату последнего релиза в репозитории.",
+  appVersion: "Приложение v{0}",
+  dlgTitle: "Новая программа", dlgSrc: "Ссылка на GitHub или «владелец/репозиторий»", dlgName: "Название", dlgDesc: "Описание",
+  dlgDescPh: "Коротко: что делает программа", dlgSec: "Раздел", dlgGroup: "Группа", dlgNewGroup: "Название новой группы",
+  newGroupOpt: "＋ Новая группа…", cancel: "Отмена", add: "Добавить", closeDlg: "Закрыть",
+  github: "GitHub", site: "Сайт", dl: "Скачать", dlTitle: "Скачать последнюю версию для Windows",
+  dlBusy: "Ищу файл…", dlOk: "Скачивается", dlOpen: "Открыто", mb: "МБ",
+  nSite: "Нет релизов на GitHub — открываю сайт загрузки", nOrg: "Выберите репозиторий на странице организации",
+  nLimit: "Лимит GitHub API исчерпан — открываю релизы", nNoWin: "Готового файла для Windows нет — открываю релизы",
+  nOffline: "Нет связи с GitHub API — открываю релизы", nNoNet: "Нет подключения к интернету",
+  hotkeys: "Горячие клавиши", hidden: "Скрытые функции", cmds: "Полезные команды (терминал от администратора)",
+  copy: "Копировать", copied: "Скопировано ✓", mine: "моё", removeCard: "Убрать карточку",
+  editHint: "Нажмите ✕ на карточке, чтобы убрать её, или «+», чтобы добавить программу", editStats: "Ваши изменения: убрано {0}, добавлено {1}",
+  addCard: "Добавить программу", removed: "Убрано: {0}", added: "Добавлено: {0}", undo: "Отменить",
+  exported: "Файл toolbox-edits.json сохранён в «Загрузки»", importErr: "Не получилось прочитать файл — это точно экспорт из этого приложения?",
+  resetNone: "Изменений нет — список уже исходный", resetConfirm: "Вернуть исходный список? Убранные карточки вернутся, добавленные вами — удалятся.",
+  ghLooking: "Ищу на GitHub…", gh404: "Репозиторий не найден — проверьте ссылку", ghFail: "GitHub не ответил, заполните поля вручную",
+  ghOffline: "Нет связи с GitHub, заполните поля вручную", ghPlain: "Обычная ссылка: кнопка «Скачать» откроет этот сайт", archived: "архивирован",
+  errSrc: "Укажите ссылку на GitHub, «владелец/репозиторий» или адрес сайта", errName: "Введите название", errGroup: "Введите название новой группы",
+  errDup: "«{0}» уже есть на странице", addedManually: "Добавлено вручную",
+  starsTitle: "Звёзды на GitHub", relTitle: "Последний релиз",
+  install: "Установить", installTitle: "Тихо установить через winget", installed: "Установлено", upgrade: "Обновить",
+  queued: "В очереди", installing: "Установка…", installFail: "Ошибка ({0})", installDone: "{0} установлено", installErr: "{0}: не удалось установить",
+  select: "☑ Выбрать", selectDone: "✓ Готово", selectTitle: "Выберите несколько программ, чтобы установить их разом или поделиться набором",
+  selCount: "Выбрано: {0}", installAll: "Установить ({0})", script: "Скрипт", saveSet: "Сохранить набор", share: "Поделиться", sets: "Наборы", clear: "Очистить",
+  setName: "Название набора:", setSaved: "Набор «{0}» сохранён", setLoaded: "Набор загружен: программ — {0}", shareCopied: "Ссылка скопирована — кто её откроет, получит этот набор",
+  setsTitle: "Сохранённые наборы", setsEmpty: "Сохранённых наборов пока нет. Выберите программы и нажмите «Сохранить набор».", load: "Открыть", del: "Удалить", appsN: "программ: {0}",
+  importSet: "Открыть набор, которым поделились (ссылка или код)", openSet: "Открыть", setBad: "Это не похоже на ссылку на набор", nothingSelected: "Выберите хотя бы одну программу",
+  scriptTitle: "Скрипт установки (PowerShell + winget)", scriptHint: "Запустите его в PowerShell. Программы, которых нет в winget, перечислены в конце — их скачайте вручную.",
+  saveScript: "Сохранить .ps1", scriptCopied: "Скрипт скопирован", notInWinget: "Нет в winget, скачайте вручную:",
+  offline: "Нет подключения к интернету — показана сохранённая версия. Скачивание и установка недоступны.",
+  updAvail: "✨ Доступна версия приложения {0}", updDownloading: "⏳ Скачиваю обновление {0}…", updReady: "✨ Обновление {0} готово — оно установится, когда вы закроете приложение",
+  restart: "Перезапустить сейчас", confirmInstall: "Установить через winget?"
+ }
+};
+
+let lang = DEFAULT_LANG;
+try { const s = localStorage.getItem("toolbox.lang"); if (LANGS.includes(s)) lang = s; } catch {}
+if (LANGS.includes(params.get("lang"))) lang = params.get("lang");   // ?lang=uk — for tests and screenshots, not remembered
+const T = (k, ...a) => (UI[lang][k] ?? UI.en[k] ?? k).replace(/\{(\d)\}/g, (_, i) => a[i]);
+const L = o => o == null ? "" : typeof o === "string" ? o : (o[lang] ?? o.en ?? o.ru);   // {en, uk, ru} → current language
+
+// ----- catalog: inlined by tools/build.mjs; when opening the raw source over http, read catalog.json -----
+const readInline = id => { try { const t = document.getElementById(id).textContent.trim(); return t ? JSON.parse(t) : null; } catch { return null; } };
+let CATALOG = readInline("catalog-data");
+if (!CATALOG) { try { CATALOG = await (await fetch("catalog.json")).json(); } catch { document.body.innerHTML = "<p style='padding:40px;font:16px sans-serif'>catalog.json is missing — run <code>node tools/build.mjs</code> and open dist/index.html.</p>"; return; } }
+const DL = (readInline("downloads-data") || {}).apps || {};   // pre-resolved downloads, refreshed daily by CI
+const DATA = CATALOG.sections, KEYS = CATALOG.keys || [], TIPS = CATALOG.tips || [], CMDS = CATALOG.cmds || [], SAFETY = CATALOG.safety || [];
+const DL_OVERRIDE = CATALOG.downloadOverrides || {};
+const APPS = new Map();   // repo key → catalog item
+for (const s of DATA) for (const g of s.groups || []) for (const it of g.items) APPS.set(it.r, it);
+
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const url = p => p.startsWith("http") ? p : GH + p;
+const host = p => p.startsWith("http") ? new URL(p).hostname : p;
+const descOf = it => (it.d && (it.d[lang] || it.d.ru)) || "";
+const stars = n => n >= 1000 ? (n / 1000).toFixed(n >= 10000 ? 0 : 1).replace(/\.0$/, "") + "k" : String(n);
+function ago(iso) {
+  const days = Math.round((Date.now() - new Date(iso + "T00:00:00Z")) / 864e5);
+  const rtf = new Intl.RelativeTimeFormat(lang, {numeric: "auto"});
+  if (days < 30) return rtf.format(-days, "day");
+  if (days < 365) return rtf.format(-Math.round(days / 30), "month");
+  return rtf.format(-Math.round(days / 365), "year");
+}
+
+// ----- desktop app bridge (WindowsToolbox.exe ≥ 1.2 opens the page with ?host=2) -----------
+const appv = params.get("appv");
+const HOST = Number(params.get("host")) >= 2 && window.chrome && window.chrome.webview ? window.chrome.webview : null;
+const send = msg => HOST && HOST.postMessage(JSON.stringify(msg));
+const W = {available: false, installed: new Set(), upgrades: new Set(), state: new Map()};   // winget state, keys lower-case
+const canInstall = it => HOST && W.available && it && it.w;
+
+const main = document.getElementById("main");
+const tabs = document.getElementById("tabs");
+let appCount = 0;
+
+// user edits: default cards removed (by repo key) + cards added by the user.
+// With EDITING_ENABLED off, stored edits are ignored (not deleted), so everyone sees the published list.
+const STORE = "toolbox.edits.v1";
+let edits = {removed: [], added: []};
+if (EDITING_ENABLED) try {
+  const s = JSON.parse(localStorage.getItem(STORE));
+  if (s && Array.isArray(s.removed) && Array.isArray(s.added)) edits = s;
+} catch {}
+
+// group key = its Russian name (stable across languages and compatible with saved edits)
+const gKey = g => typeof g.name === "string" ? g.name : g.name.ru;
+const selected = new Set();   // repo keys picked in select mode
+
+function installBtn(it) {
+  if (!canInstall(it)) return "";
+  const id = it.w.toLowerCase(), st = W.state.get(id);
+  let cls = "", ic = "⤓", lb = T("install");
+  if (st === "queued") { cls = "busy"; ic = "◌"; lb = T("queued"); }
+  else if (st === "running") { cls = "busy"; ic = "◌"; lb = T("installing"); }
+  else if (st && st.startsWith("error")) { cls = "err"; ic = "!"; lb = T("installFail", st.slice(6)); }
+  else if (W.upgrades.has(id)) { cls = "upg"; ic = "↻"; lb = T("upgrade"); }
+  else if (W.installed.has(id)) { cls = "done"; ic = "✓"; lb = T("installed"); }
+  return `<button class="btn inst ${cls}" type="button" data-w="${esc(it.w)}" title="${esc(T("installTitle"))} (${esc(it.w)})"><span class="ic">${ic}</span><span class="lb">${lb}</span></button>`;
+}
+function metaHTML(p, it) {
+  const m = DL[p] || {};
+  let h = `<span class="host">${esc(host(p))}</span>`;
+  if (m.st != null) h += `<span class="chip" title="${esc(T("starsTitle"))}">★ ${stars(m.st)}</span>`;
+  if (m.t) h += `<span class="chip" title="${esc(T("relTitle"))}">${esc(m.t.length > 16 ? m.t.slice(0, 15) + "…" : m.t)}${m.at ? " · " + esc(ago(m.at)) : ""}</span>`;
+  if (m.ar) h += `<span class="chip warn">${T("archived")}</span>`;
+  if (it && it.w && HOST && W.installed.has(it.w.toLowerCase())) h += `<span class="chip inst">✓ ${T("installed")}</span>`;
+  return `<div class="meta">${h}</div>`;
+}
+const cardHTML = (n, p, d, key, mine) => {
+  const it = mine ? null : APPS.get(p);
+  const inst = installBtn(it);
+  return `<div class="card${mine ? " mine" : ""}${selected.has(key) ? " picked" : ""}" data-key="${esc(key)}" data-q="${esc((n+" "+d+" "+p).toLowerCase())}">
+  <button class="rm" type="button" title="${esc(T("removeCard"))}" aria-label="${esc(T("removeCard"))}: ${esc(n)}">✕</button>
+  <label class="pick" title="${esc(n)}"><input type="checkbox"${selected.has(key) ? " checked" : ""} aria-label="${esc(n)}"><span></span></label>
+  <div class="card-t"><a href="${url(p)}" target="_blank" rel="noopener">${esc(n)}${mine ? `<span class="mine-tag">${T("mine")}</span>` : ""}</a><span class="arr">↗</span></div><p>${esc(d)}</p>${metaHTML(p, it)}
+  <div class="acts"><a class="btn gh${inst ? " compact" : ""}" href="${url(p)}" target="_blank" rel="noopener" title="${p.startsWith("http") ? T("site") : T("github")}">${inst ? "↗" : (p.startsWith("http") ? T("site") : T("github"))}</a><button class="btn dl" data-src="${esc(p)}" title="${esc(T("dlTitle"))}"><span class="ic">⬇</span><span class="lb">${T("dl")}</span></button>${inst}</div>
+  <div class="st"></div></div>`;
+};
+const groupHTML = (secId, key, label, inner) => `<div class="group" data-sec="${secId}" data-group="${esc(key)}"><h3>${esc(label)}</h3><div class="cards">${inner}<button class="add-card" type="button"><b>+</b>${T("addCard")}</button></div></div>`;
+const addedCards = (secId, key) => edits.added.filter(a => a.sec === secId && a.group === key)
+  .map(a => { appCount++; return cardHTML(a.n, a.p, a.d, a.id, true); }).join("");
+
+// reveal on scroll (staggered)
+const io = new IntersectionObserver(es => es.forEach(e => {
+  if (e.isIntersecting) { const el = e.target; const i = [...el.parentElement.children].indexOf(el);
+    el.style.transitionDelay = (Math.min(i,12)*45)+"ms"; el.classList.add("vis"); io.unobserve(el);
+    setTimeout(()=>el.style.transitionDelay="", 1200); }
+}), {threshold:.08});
+
+let secs = [];
+function render() {
+  const removedSet = new Set(edits.removed);
+  appCount = 0; main.innerHTML = ""; tabs.innerHTML = "";
+  DATA.forEach(sec => {
+    const s = document.createElement("section");
+    s.id = sec.id;
+    let html = `<div class="sec-h"><div class="sec-ic">${sec.icon}</div><h2>${esc(L(sec.title))}</h2></div><p class="sec-d">${esc(L(sec.desc))}</p>`;
+    if (sec.groups) {
+      sec.groups.forEach(g => {
+        let inner = "";
+        g.items.forEach(it => {
+          if (removedSet.has(it.r)) return;
+          appCount++;
+          inner += cardHTML(it.n, it.r, descOf(it), it.r, false);
+        });
+        html += groupHTML(sec.id, gKey(g), L(g.name), inner + addedCards(sec.id, gKey(g)));
+      });
+      // groups the user created in this section
+      [...new Set(edits.added.filter(a => a.sec === sec.id && !sec.groups.some(g => gKey(g) === a.group)).map(a => a.group))]
+        .forEach(gn => { html += groupHTML(sec.id, gn, gn, addedCards(sec.id, gn)); });
+      if (sec.note) html += `<div class="note">⚠️ ${esc(L(sec.note))}</div>`;
+    } else if (sec.special === "tricks") {
+      html += `<h3>${T("hotkeys")}</h3><div class="keys">` +
+        KEYS.map(k => `<div class="key"><div class="combo">${k.keys.map(x=>`<kbd>${esc(x)}</kbd>`).join("")}</div><span>${esc(L(k.d))}</span></div>`).join("") +
+        `</div><h3>${T("hidden")}</h3><div class="tips">` +
+        TIPS.map(t => `<div class="tip"><b>${esc(L(t.t))}</b><span>${L(t.d)}</span></div>`).join("") +
+        `</div><h3>${T("cmds")}</h3><div class="cmds">` +
+        CMDS.map(c => `<div class="cmd"><div class="cmd-h"><span style="display:flex;align-items:center"><span class="dots"><i></i><i></i><i></i></span>${esc(L(c.t))}</span><button class="copy" type="button">${T("copy")}</button></div><pre>${esc(L(c.c))}</pre></div>`).join("") +
+        `</div>`;
+    } else if (sec.special === "safety") {
+      html += `<ol class="warn">` + SAFETY.map(t => `<li>${L(t)}</li>`).join("") + `</ol>`;
+    }
+    s.innerHTML = html;
+    main.appendChild(s);
+
+    const b = document.createElement("button");
+    b.className = "tab"; b.textContent = sec.icon + " " + L(sec.title); b.dataset.id = sec.id;
+    b.onclick = () => document.getElementById(sec.id).scrollIntoView();
+    tabs.appendChild(b);
+  });
+  document.querySelectorAll(".card,.key,.tip,.cmd,.warn li").forEach(el => io.observe(el));
+  secs = [...document.querySelectorAll("section")];
+}
+
+// static texts in the markup: data-i18n (text), data-i18n-ph (placeholder), data-i18n-title (tooltip)
+function applyStatic() {
+  document.documentElement.lang = lang;
+  document.querySelectorAll("[data-i18n]").forEach(el => el.textContent = T(el.dataset.i18n));
+  document.querySelectorAll("[data-i18n-ph]").forEach(el => el.placeholder = T(el.dataset.i18nPh));
+  document.querySelectorAll("[data-i18n-title]").forEach(el => el.title = T(el.dataset.i18nTitle));
+  document.querySelectorAll("#lang button").forEach(b => b.classList.toggle("on", b.dataset.l === lang));
+}
+
+render();
+applyStatic();
+
+// animated counters (first load only; later updates set the number directly)
+const counts = {apps: appCount, keys: KEYS.length, secs: DATA.length};
+document.querySelectorAll("[data-count]").forEach(el => {
+  const target = counts[el.dataset.count]; const t0 = performance.now();
+  (function step(t){ const k = Math.min(1,(t-t0)/1400); el.textContent = Math.round(target*(1-Math.pow(1-k,3))); if(k<1) requestAnimationFrame(step); })(t0);
+});
+
+// spotlight follows cursor on cards
+document.addEventListener("pointermove", e => {
+  const c = e.target.closest(".card"); if (!c) return;
+  const r = c.getBoundingClientRect();
+  c.style.setProperty("--mx", (e.clientX-r.left)+"px"); c.style.setProperty("--my", (e.clientY-r.top)+"px");
+});
+
+const toastEl = document.getElementById("toast");
+let toastTimer;
+function toast(msg, onUndo) {
+  toastEl.innerHTML = `<span>${esc(msg)}</span>` + (onUndo ? `<button type="button">${T("undo")}</button>` : "");
+  if (onUndo) toastEl.querySelector("button").onclick = () => { onUndo(); toastEl.classList.remove("show"); };
+  toastEl.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toastEl.classList.remove("show"), 6000);
+}
+
+// ---- offline notice ----------------------------------------------------------------------
+const offlineEl = document.getElementById("offline");
+const syncOnline = () => { offlineEl.hidden = navigator.onLine; };
+addEventListener("online", syncOnline); addEventListener("offline", syncOnline);
+syncOnline();
+
+// ---- download buttons: pre-resolved link (downloads.json) → else live GitHub API lookup --------
+const SKIP_EXT = /\.(sha\d*|sig|asc|txt|json|ya?ml|blockmap|pdb|sym|md5|dmg|pkg|appimage|deb|rpm|apk|aab|ipa|flatpak|snap|tar\.(gz|xz|bz2|zst)|tgz|xz)$/;
+const SKIP_NAME = /(linux|macos|darwin|osx|android|ios|freebsd|source|src|debug|symbols|dbgsym)/;
+// Same scoring as tools/resolve.mjs; keep the two in sync.
+function pickAsset(assets) {
+  let best = null, bs = -1e9;
+  for (const a of assets) {
+    const n = a.name.toLowerCase();
+    if (SKIP_EXT.test(n) || SKIP_NAME.test(n)) continue;
+    let s;
+    if (n.endsWith(".exe")) s = 50; else if (n.endsWith(".msi")) s = 45;
+    else if (/\.msix(bundle)?$/.test(n)) s = 30; else if (n.endsWith(".zip")) s = 25;
+    else if (n.endsWith(".7z")) s = 20; else continue;
+    const win = /win/.test(n);
+    if (win) s += 20;
+    if (/(x64|amd64|x86_64|win64)/.test(n)) s += 10;
+    if (/(arm64|aarch64|arm)/.test(n)) s -= 40;
+    if (/(x86|win32|i386|i686)/.test(n) && !/x86_64/.test(n)) s -= 8;
+    if (/(setup|install)/.test(n)) s += 4;
+    if (/(\dto\d|update|patch|delta|uninstall)/.test(n)) s -= 30;
+    if (!win && /\.(zip|7z)$/.test(n)) s -= 15;
+    if (s > bs) { bs = s; best = a; }
+  }
+  return bs >= 10 ? best : null;
+}
+const gh = r => fetch("https://api.github.com/repos/" + r, {headers: {Accept: "application/vnd.github+json"}});
+// result: {url, direct, note: message key | file: {name, size, tag}}
+function fromDL(src) {
+  const m = DL[src]; if (!m || !m.u) return null;
+  if (m.k === "file") return {url: m.u, direct: true, file: {name: m.f, size: m.s, tag: m.t || ""}};
+  if (m.k === "direct") return {url: m.u, direct: true, file: {name: m.u.split("/").pop()}};
+  return {url: m.u, direct: false, note: m.k === "site" ? "nSite" : m.k === "org" ? "nOrg" : "nNoWin"};
+}
+async function findDownload(src) {
+  const target = DL_OVERRIDE[src] || src;
+  if (target.startsWith("http")) {
+    const direct = /\.(zip|exe|msi|7z)$/i.test(target);
+    return {url: target, direct, note: direct ? null : "nSite", file: direct ? {name: target.split("/").pop()} : null};
+  }
+  if (!target.includes("/")) return {url: GH + target, direct: false, note: "nOrg"};
+  const page = GH + target + "/releases";
+  let rel = null, r = await gh(target + "/releases/latest");
+  if (r.status === 403 || r.status === 429) return {url: page, direct: false, note: "nLimit"};
+  if (r.ok) rel = await r.json();
+  if (!rel || !(rel.assets || []).length) {
+    r = await gh(target + "/releases?per_page=6");
+    if (r.ok) rel = (await r.json()).find(x => !x.draft && x.assets && x.assets.length) || rel;
+  }
+  const a = rel && pickAsset(rel.assets || []);
+  if (!a) return {url: rel ? page : GH + target, direct: false, note: "nNoWin"};
+  return {url: a.browser_download_url, direct: true, file: {name: a.name, size: a.size, tag: rel.tag_name || ""}};
+}
+const noteText = res => {
+  if (!res.file) return T(res.note);
+  const f = res.file;
+  if (f.size == null) return f.name;
+  const mb = (f.size / 1048576).toFixed(f.size > 10485760 ? 0 : 1);
+  return `${f.name} · ${mb} ${T("mb")}${f.tag ? " · " + f.tag : ""}`;
+};
+const dlCache = new Map();
+document.addEventListener("click", async e => {
+  const b = e.target.closest(".btn.dl[data-src]"); if (!b) return;
+  const lb = b.querySelector(".lb"), ic = b.querySelector(".ic"), st = b.closest(".card").querySelector(".st");
+  if (!navigator.onLine) { st.textContent = T("nNoNet"); st.classList.add("show"); return; }
+  b.classList.remove("ok", "alt"); b.classList.add("busy"); lb.textContent = T("dlBusy"); ic.textContent = "◌";
+  let res = fromDL(b.dataset.src) || dlCache.get(b.dataset.src);
+  if (!res) {
+    try { res = await findDownload(b.dataset.src); dlCache.set(b.dataset.src, res); }
+    catch { const s = b.dataset.src; res = {url: s.startsWith("http") ? s : GH + s + "/releases", direct: false, note: "nOffline"}; }
+  }
+  b.classList.remove("busy");
+  st.textContent = noteText(res); st.classList.add("show");
+  if (res.direct) {
+    const a = document.createElement("a"); a.href = res.url; a.rel = "noopener"; a.setAttribute("download", "");
+    document.body.appendChild(a); a.click(); a.remove();
+    b.classList.add("ok"); lb.textContent = T("dlOk"); ic.textContent = "✓";
+  } else {
+    window.open(res.url, "_blank", "noopener");
+    b.classList.add("alt"); lb.textContent = T("dlOpen"); ic.textContent = "↗";
+  }
+  setTimeout(() => { b.classList.remove("ok", "alt"); lb.textContent = T("dl"); ic.textContent = "⬇"; }, 4000);
+});
+
+// copy buttons
+async function copyText(txt) {
+  try { await navigator.clipboard.writeText(txt); }
+  catch { const ta = document.createElement("textarea"); ta.value = txt; document.body.appendChild(ta); ta.select(); document.execCommand("copy"); ta.remove(); }
+}
+document.addEventListener("click", async e => {
+  const b = e.target.closest(".copy"); if (!b) return;
+  await copyText(b.closest(".cmd").querySelector("pre").textContent);
+  b.textContent = T("copied"); b.classList.add("done");
+  setTimeout(()=>{ b.textContent = T("copy"); b.classList.remove("done"); }, 1600);
+});
+
+// search
+const q = document.getElementById("q"), empty = document.getElementById("empty");
+function applySearch() {
+  const v = q.value.trim().toLowerCase(); let any = false;
+  document.querySelectorAll("section").forEach(s => {
+    let secHit = false;
+    s.querySelectorAll(".group").forEach(g => {
+      let hit = false;
+      g.querySelectorAll(".card").forEach(c => { const m = !v || c.dataset.q.includes(v); c.classList.toggle("hidden", !m); if (m) { hit = true; if (v) c.classList.add("vis"); } });
+      g.classList.toggle("hidden", !hit && !!v); secHit ||= hit;
+    });
+    const plain = !s.querySelector(".group");
+    s.classList.toggle("hidden", !!v && (plain || !secHit)); if (!v || secHit) any = true;
+  });
+  empty.style.display = any ? "none" : "block";
+}
+q.addEventListener("input", applySearch);
+
+// active tab + progress + top button
+const topBtn = document.getElementById("top"), prog = document.getElementById("progress");
+function onScroll() {
+  const y = scrollY; prog.style.width = (y/(document.documentElement.scrollHeight-innerHeight)*100)+"%";
+  topBtn.classList.toggle("show", y > 600);
+  let cur = secs[0].id; secs.forEach(s => { if (!s.classList.contains("hidden") && s.offsetTop - 150 <= y) cur = s.id; });
+  document.querySelectorAll(".tab").forEach(t => t.classList.toggle("on", t.dataset.id === cur));
+}
+addEventListener("scroll", onScroll, {passive:true});
+topBtn.onclick = () => scrollTo({top:0});
+onScroll();
+
+// re-render everything keeping the scroll position (language switch, winget state change)
+function rerender() {
+  const y = scrollY;
+  render(); applyStatic(); applySearch(); updateEditInfo(); updateCount(); updateSel(); updateVersion(); renderUpdate();
+  document.querySelectorAll(".card,.key,.tip,.cmd,.warn li").forEach(el => el.classList.add("vis")); // no re-reveal
+  scrollTo(0, y); onScroll();
+}
+// cheaper refresh of install buttons + "installed" chips only
+function refreshInstallButtons() {
+  document.querySelectorAll(".card[data-key]").forEach(c => {
+    const it = APPS.get(c.dataset.key); if (!it || !it.w) return;
+    const acts = c.querySelector(".acts"), old = acts.querySelector(".inst"), html = installBtn(it);
+    const g = acts.querySelector(".gh");
+    if (old && !html) { old.remove(); g.classList.remove("compact"); g.textContent = it.r.startsWith("http") ? T("site") : T("github"); }
+    else if (old) old.outerHTML = html; else if (html) { acts.insertAdjacentHTML("beforeend", html); g.classList.add("compact"); g.textContent = "↗"; }
+    c.querySelector(".meta").outerHTML = metaHTML(it.r, it);
+  });
+  updateSel();
+}
+
+// ---- edit mode: remove / add cards, persisted in localStorage --------------------------
+const editBtn = document.getElementById("editBtn"), editInfo = document.getElementById("editInfo");
+if (!EDITING_ENABLED) editBtn.remove();
+
+function saveEdits() {
+  try { localStorage.setItem(STORE, JSON.stringify(edits)); } catch {}
+  updateEditInfo();
+}
+function updateEditInfo() {
+  const r = edits.removed.length, a = edits.added.length;
+  editInfo.textContent = r || a ? T("editStats", r, a) : T("editHint");
+  editBtn.textContent = document.body.classList.contains("editing") ? T("done") : T("edit");
+}
+function updateCount() {
+  const el = document.querySelector('[data-count="apps"]');
+  if (el) el.textContent = document.querySelectorAll(".card:not(.out)").length;
+}
+
+editBtn.onclick = () => {
+  const on = document.body.classList.toggle("editing");
+  editBtn.classList.toggle("on", on);
+  updateEditInfo();
+};
+
+// remove a card (undo via toast)
+document.addEventListener("click", e => {
+  const rm = e.target.closest(".rm"); if (!rm) return;
+  const card = rm.closest(".card"), key = card.dataset.key;
+  const name = card.querySelector(".card-t a").firstChild.textContent;
+  const parent = card.parentElement, next = card.nextElementSibling;
+  let undo;
+  if (card.classList.contains("mine")) {
+    const i = edits.added.findIndex(a => a.id === key);
+    const item = edits.added.splice(i, 1)[0];
+    undo = () => edits.added.splice(i, 0, item);
+  } else {
+    edits.removed.push(key);
+    undo = () => { edits.removed = edits.removed.filter(k => k !== key); };
+  }
+  saveEdits();
+  card.classList.add("out");
+  const t = setTimeout(() => { card.remove(); updateCount(); }, 300);
+  toast(T("removed", name), () => {
+    clearTimeout(t); undo(); saveEdits();
+    parent.insertBefore(card, next && next.parentElement === parent ? next : parent.querySelector(".add-card"));
+    card.classList.remove("out"); card.classList.add("new", "vis");
+    setTimeout(() => card.classList.remove("new"), 600);
+    updateCount();
+  });
+});
+
+// add dialog
+const dlg = document.getElementById("addDlg"), form = document.getElementById("addForm");
+const fSrc = form.elements.src, fName = form.elements.n, fDesc = form.elements.d;
+const fSec = form.elements.sec, fGroup = form.elements.group, fNew = form.elements.newGroup;
+const newGroupL = document.getElementById("newGroupL"), ghHint = document.getElementById("ghHint"), addErr = document.getElementById("addErr");
+const editableSecs = DATA.filter(s => s.groups);
+function fillSecs() {
+  const v = fSec.value;
+  fSec.innerHTML = editableSecs.map(s => `<option value="${s.id}">${s.icon} ${esc(L(s.title))}</option>`).join("");
+  if (v) fSec.value = v;
+}
+function fillGroups(selectedKey) {
+  const groups = [...document.querySelectorAll(`#${fSec.value} .group`)];
+  fGroup.innerHTML = groups.map(g => `<option value="${esc(g.dataset.group)}">${esc(g.querySelector("h3").textContent)}</option>`).join("") +
+    `<option value="__new">${T("newGroupOpt")}</option>`;
+  if (selectedKey && groups.some(g => g.dataset.group === selectedKey)) fGroup.value = selectedKey;
+  newGroupL.hidden = fGroup.value !== "__new";
+}
+fSec.onchange = () => fillGroups();
+fGroup.onchange = () => { newGroupL.hidden = fGroup.value !== "__new"; if (!newGroupL.hidden) fNew.focus(); };
+
+// "https://github.com/owner/repo/..." | "owner/repo" | any http(s) link → canonical source
+function normSrc(v) {
+  v = v.trim().replace(/\.git$/i, "").replace(/\/+$/, "");
+  const m = v.match(/^(?:https?:\/\/)?(?:www\.)?github\.com\/([\w.-]+)(?:\/([\w.-]+))?/i);
+  if (m) return m[2] ? m[1] + "/" + m[2] : m[1];
+  if (/^[\w.-]+\/[\w.-]+$/.test(v)) return v;
+  if (/^https?:\/\//i.test(v)) { try { new URL(v); return v; } catch {} }
+  return null;
+}
+
+function openAdd(secId, groupKey) {
+  form.reset(); addErr.textContent = ""; ghHint.textContent = ""; ghHint.className = "hint";
+  fName.dataset.auto = fDesc.dataset.auto = "1";
+  fillSecs();
+  fSec.value = secId || editableSecs[0].id;
+  fillGroups(groupKey);
+  dlg.showModal();
+  fSrc.focus();
+}
+document.addEventListener("click", e => {
+  const b = e.target.closest(".add-card"); if (!b) return;
+  const g = b.closest(".group");
+  openAdd(g.dataset.sec, g.dataset.group);
+});
+document.getElementById("addCancel").onclick = () => dlg.close();
+document.querySelectorAll("dialog").forEach(d => d.addEventListener("click", e => { if (e.target === d) d.close(); })); // click on backdrop
+
+// fill name/description from GitHub while typing the repo
+fName.oninput = () => { fName.dataset.auto = fName.value ? "" : "1"; };
+fDesc.oninput = () => { fDesc.dataset.auto = fDesc.value ? "" : "1"; };
+let ghTimer, ghSeq = 0;
+fSrc.addEventListener("input", () => {
+  clearTimeout(ghTimer);
+  const p = normSrc(fSrc.value);
+  ghHint.className = "hint";
+  if (!p || p.startsWith("http") || !p.includes("/")) { ghHint.textContent = p && p.startsWith("http") ? T("ghPlain") : ""; return; }
+  ghHint.textContent = T("ghLooking");
+  const seq = ++ghSeq;
+  ghTimer = setTimeout(async () => {
+    try {
+      const r = await gh(p);
+      if (seq !== ghSeq) return;
+      if (!r.ok) { ghHint.textContent = r.status === 404 ? T("gh404") : T("ghFail"); return; }
+      const j = await r.json();
+      if (fName.dataset.auto) fName.value = j.name;
+      if (fDesc.dataset.auto && j.description) fDesc.value = j.description.length > 90 ? j.description.slice(0, 87) + "…" : j.description;
+      ghHint.textContent = `✓ ${j.full_name} · ★ ${stars(j.stargazers_count)}${j.archived ? " · " + T("archived") : ""}`;
+      ghHint.className = "hint ok";
+    } catch { if (seq === ghSeq) ghHint.textContent = T("ghOffline"); }
+  }, 450);
+});
+
+form.addEventListener("submit", e => {
+  e.preventDefault();
+  const p = normSrc(fSrc.value), n = fName.value.trim(), d = fDesc.value.trim() || T("addedManually");
+  const group = fGroup.value === "__new" ? fNew.value.trim() : fGroup.value;
+  if (!p) return addErr.textContent = T("errSrc");
+  if (!n) return addErr.textContent = T("errName");
+  if (!group) return addErr.textContent = T("errGroup");
+  const dup = [...document.querySelectorAll(".card:not(.out) .btn.dl")].find(b => b.dataset.src.toLowerCase() === p.toLowerCase());
+  if (dup) return addErr.textContent = T("errDup", dup.closest(".card").querySelector(".card-t a").firstChild.textContent);
+
+  const item = {id: "u" + Date.now().toString(36), sec: fSec.value, group, n, p, d};
+  edits.added.push(item);
+  saveEdits();
+
+  const secEl = document.getElementById(item.sec);
+  let gEl = [...secEl.querySelectorAll(".group")].find(g => g.dataset.group === group);
+  if (!gEl) {
+    const note = secEl.querySelector(".note");
+    (note || secEl).insertAdjacentHTML(note ? "beforebegin" : "beforeend", groupHTML(item.sec, group, group, ""));
+    gEl = [...secEl.querySelectorAll(".group")].find(g => g.dataset.group === group);
+  }
+  gEl.querySelector(".add-card").insertAdjacentHTML("beforebegin", cardHTML(n, p, d, item.id, true));
+  const card = gEl.querySelector(`.card[data-key="${item.id}"]`);
+  card.classList.add("vis", "new");
+  dlg.close();
+  card.scrollIntoView({block: "center", behavior: "smooth"});
+  updateCount();
+  toast(T("added", n));
+});
+
+// export / import / reset
+function saveFile(name, text, type) {
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([text], {type})); a.download = name;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+}
+document.getElementById("expBtn").onclick = () => {
+  saveFile("toolbox-edits.json", JSON.stringify({app: "windows-toolbox", version: 1, ...edits}, null, 2), "application/json");
+  toast(T("exported"));
+};
+const impFile = document.getElementById("impFile");
+document.getElementById("impBtn").onclick = () => impFile.click();
+impFile.onchange = async () => {
+  const f = impFile.files[0]; impFile.value = ""; if (!f) return;
+  try {
+    const j = JSON.parse(await f.text());
+    const str = v => typeof v === "string" ? v.slice(0, 300) : "";
+    const next = {
+      removed: (j.removed || []).filter(k => typeof k === "string"),
+      added: (j.added || []).filter(a => a && a.n && a.p && a.sec && a.group && normSrc(String(a.p)))
+        .map((a, i) => ({id: str(a.id) || "u" + Date.now().toString(36) + i, sec: str(a.sec), group: str(a.group), n: str(a.n), p: normSrc(String(a.p)), d: str(a.d)}))
+    };
+    if (!Array.isArray(j.removed) && !Array.isArray(j.added)) throw 0;
+    edits = next; saveEdits(); location.reload();
+  } catch { toast(T("importErr")); }
+};
+document.getElementById("resetBtn").onclick = () => {
+  if (!edits.removed.length && !edits.added.length) return toast(T("resetNone"));
+  if (!confirm(T("resetConfirm"))) return;
+  edits = {removed: [], added: []}; saveEdits(); location.reload();
+};
+
+// ---- select mode, sets, install script -----------------------------------------------------
+const selBtn = document.getElementById("selBtn");
+const SETS_KEY = "toolbox.sets.v1";
+const loadSets = () => { try { const s = JSON.parse(localStorage.getItem(SETS_KEY)); return Array.isArray(s) ? s : []; } catch { return []; } };
+const storeSets = s => { try { localStorage.setItem(SETS_KEY, JSON.stringify(s)); } catch {} };
+const nameOf = k => (APPS.get(k) || {}).n || k;
+
+function setSelecting(on) {
+  document.body.classList.toggle("selecting", on);
+  selBtn.classList.toggle("on", on);
+  updateSel();
+}
+function updateSel() {
+  selBtn.textContent = document.body.classList.contains("selecting") ? T("selectDone") : T("select");
+  document.getElementById("selCount").textContent = T("selCount", selected.size);
+  const inst = document.getElementById("selInstall");
+  const todo = [...selected].map(k => APPS.get(k)).filter(it => canInstall(it) && !W.installed.has(it.w.toLowerCase()));
+  inst.hidden = !(HOST && W.available);
+  inst.textContent = T("installAll", todo.length);
+  inst.disabled = !todo.length;
+  ["selScript", "selSave", "selShare", "selClear"].forEach(id => document.getElementById(id).disabled = !selected.size);
+}
+selBtn.onclick = () => setSelecting(!document.body.classList.contains("selecting"));
+document.addEventListener("change", e => {
+  const box = e.target.closest(".pick input"); if (!box) return;
+  const card = box.closest(".card"), k = card.dataset.key;
+  if (box.checked) selected.add(k); else selected.delete(k);
+  card.classList.toggle("picked", box.checked);
+  updateSel();
+});
+function applySelection(keys) {
+  selected.clear();
+  keys.filter(k => APPS.has(k)).forEach(k => selected.add(k));
+  document.querySelectorAll(".card[data-key]").forEach(c => {
+    const on = selected.has(c.dataset.key);
+    c.classList.toggle("picked", on);
+    const box = c.querySelector(".pick input"); if (box) box.checked = on;
+  });
+  setSelecting(true);
+}
+document.getElementById("selClear").onclick = () => applySelection([]);
+
+// share format: <SITE>#set=<owner/repo>,<owner/repo>,… (also accepted pasted on its own)
+const setLink = keys => SITE + "#set=" + keys.map(encodeURIComponent).join(",");
+function parseSet(text) {
+  const m = String(text).match(/#?set=([^\s#]+)/);
+  if (!m) return null;
+  const keys = m[1].split(",").map(s => { try { return decodeURIComponent(s); } catch { return ""; } }).filter(k => APPS.has(k));
+  return keys.length ? keys : null;
+}
+document.getElementById("selShare").onclick = async () => { await copyText(setLink([...selected])); toast(T("shareCopied")); };
+document.getElementById("selSave").onclick = () => {
+  const name = (prompt(T("setName"), "") || "").trim(); if (!name) return;
+  const sets = loadSets().filter(s => s.name !== name);
+  sets.unshift({name, keys: [...selected]});
+  storeSets(sets.slice(0, 50));
+  toast(T("setSaved", name));
+};
+const setsDlg = document.getElementById("setsDlg"), setList = document.getElementById("setList"), setErr = document.getElementById("setErr");
+function renderSets() {
+  const sets = loadSets();
+  setList.innerHTML = sets.length ? sets.map((s, i) => `<div class="setrow"><span>${esc(s.name)}</span><small>${T("appsN", s.keys.length)}</small>
+    <button type="button" class="btn dl" data-load="${i}">${T("load")}</button><button type="button" class="btn danger" data-del="${i}">${T("del")}</button></div>`).join("")
+    : `<p class="muted">${T("setsEmpty")}</p>`;
+}
+document.getElementById("selSets").onclick = () => { renderSets(); setErr.textContent = ""; document.getElementById("setImport").value = ""; setsDlg.showModal(); };
+setList.addEventListener("click", e => {
+  const sets = loadSets();
+  const l = e.target.closest("[data-load]"), d = e.target.closest("[data-del]");
+  if (l) { const s = sets[+l.dataset.load]; applySelection(s.keys); setsDlg.close(); toast(T("setLoaded", selected.size)); }
+  if (d) { sets.splice(+d.dataset.del, 1); storeSets(sets); renderSets(); }
+});
+document.getElementById("setImportBtn").onclick = () => {
+  const keys = parseSet(document.getElementById("setImport").value);
+  if (!keys) return setErr.textContent = T("setBad");
+  applySelection(keys); setsDlg.close(); toast(T("setLoaded", keys.length));
+};
+
+const scriptDlg = document.getElementById("scriptDlg"), scriptText = document.getElementById("scriptText");
+function buildScript(keys) {
+  const its = keys.map(k => APPS.get(k)).filter(Boolean);
+  const wg = its.filter(it => it.w), manual = its.filter(it => !it.w);
+  let s = `# Windows Toolbox — ${new Date().toISOString().slice(0, 10)}\n# PowerShell + winget\n\n`;
+  if (wg.length) {
+    s += "$apps = @(\n" + wg.map(it => `  "${it.w}"   # ${it.n}`).join(",\n") + "\n)\n\n";
+    s += "foreach ($id in $apps) {\n  Write-Host \"==> $id\" -ForegroundColor Cyan\n  winget install --id $id --exact --silent --accept-package-agreements --accept-source-agreements\n}\n";
+  }
+  if (manual.length) s += `\n# ${T("notInWinget")}\n` + manual.map(it => `#   ${it.n}: ${url(it.r)}`).join("\n") + "\n";
+  return s;
+}
+document.getElementById("selScript").onclick = () => { scriptText.value = buildScript([...selected]); scriptDlg.showModal(); };
+document.getElementById("scriptCopy").onclick = async () => { await copyText(scriptText.value); toast(T("scriptCopied")); };
+document.getElementById("scriptSave").onclick = () => saveFile("windows-toolbox-install.ps1", "﻿" + scriptText.value, "text/plain");
+
+// a shared link opens the page with #set=…
+const hashSet = parseSet(location.hash);
+if (hashSet) { applySelection(hashSet); toast(T("setLoaded", hashSet.length)); history.replaceState(null, "", location.pathname + location.search); }
+
+// ---- winget install (desktop app only) -----------------------------------------------------
+function parseInstalled(exportJson) {
+  try { return new Set(JSON.parse(exportJson).Sources.flatMap(s => s.Packages.map(p => p.PackageIdentifier.toLowerCase()))); }
+  catch { return new Set(); }
+}
+// `winget upgrade` prints a table; long IDs may be cut with "…", so match by prefix
+function parseUpgrades(text) {
+  const out = new Set(), tokens = String(text).split(/\s+/);
+  for (const it of APPS.values()) {
+    if (!it.w) continue;
+    const id = it.w.toLowerCase();
+    if (tokens.some(t => { t = t.toLowerCase(); return t === id || (t.endsWith("…") && t.length > 6 && id.startsWith(t.slice(0, -1))); })) out.add(id);
+  }
+  return out;
+}
+function requestInstall(ids) {
+  const its = ids.map(w => [...APPS.values()].find(it => it.w === w)).filter(Boolean);
+  if (!its.length) return;
+  its.forEach(it => W.state.set(it.w.toLowerCase(), "queued"));
+  refreshInstallButtons();
+  send({cmd: "install", ids: its.map(it => it.w), names: its.map(it => it.n), lang});
+}
+document.addEventListener("click", e => {
+  const b = e.target.closest(".btn.inst"); if (!b || b.classList.contains("done") || b.classList.contains("busy")) return;
+  requestInstall([b.dataset.w]);
+});
+document.getElementById("selInstall").onclick = () =>
+  requestInstall([...selected].map(k => APPS.get(k)).filter(it => canInstall(it) && !W.installed.has(it.w.toLowerCase())).map(it => it.w));
+
+// ---- desktop app: version, self-update ---------------------------------------------------------
+// The exe opens this page as index.html?appv=<version>[&host=2]; in a normal browser there is neither.
+const verEl = document.getElementById("ver");
+const updateVersion = () => { verEl.textContent = appv ? T("appVersion", appv) : ""; };
+updateVersion();
+const upd = document.getElementById("upd"), updMsg = document.getElementById("updMsg");
+const updLink = document.getElementById("updLink"), updRestart = document.getElementById("updRestart");
+let updState = null;   // {state: "available"|"downloading"|"ready", version, url}
+function renderUpdate() {
+  let skipped = null; try { skipped = localStorage.getItem("toolbox.skipVersion"); } catch {}
+  if (!updState || (updState.state === "available" && skipped === updState.version)) { upd.hidden = true; return; }
+  updMsg.textContent = T(updState.state === "ready" ? "updReady" : updState.state === "downloading" ? "updDownloading" : "updAvail", updState.version);
+  updLink.hidden = updState.state !== "available";
+  if (updState.url) updLink.href = updState.url;
+  updRestart.hidden = updState.state !== "ready";
+  upd.hidden = false;
+}
+document.getElementById("updX").onclick = () => {
+  upd.hidden = true;
+  if (updState && updState.state === "available") try { localStorage.setItem("toolbox.skipVersion", updState.version); } catch {}
+};
+updRestart.onclick = () => send({cmd: "applyUpdate"});
+
+const semver = v => String(v).replace(/^v/i, "").split(/[.-]/).slice(0, 3).map(x => parseInt(x, 10) || 0);
+const newer = (a, b) => { const x = semver(a), y = semver(b); for (let i = 0; i < 3; i++) if (x[i] !== y[i]) return x[i] > y[i]; return false; };
+if (appv && !HOST && !/dev/.test(appv)) {
+  // older exe (≤ 1.1) without a host bridge: just point to the new release.
+  // latest.json is a plain file (no API rate limit); the GitHub API is the fallback.
+  fetch(`https://raw.githubusercontent.com/${REPO}/main/latest.json?t=${Date.now()}`).then(r => r.ok ? r.json() : Promise.reject())
+    .catch(() => gh(REPO + "/releases/latest").then(r => r.ok ? r.json() : null).then(rel => {
+      if (!rel) return null;
+      const exe = (rel.assets || []).find(a => /\.exe$/i.test(a.name));
+      return {version: rel.tag_name, url: exe ? exe.browser_download_url : rel.html_url};
+    }))
+    .then(l => {
+      if (!l || !newer(l.version, appv)) return;
+      updState = {state: "available", version: l.version, url: l.url};
+      renderUpdate();
+    }).catch(() => {});
+}
+
+// messages from the exe
+if (HOST) HOST.addEventListener("message", e => {
+  let m = e.data; if (typeof m === "string") try { m = JSON.parse(m); } catch { return; }
+  if (!m || !m.type) return;
+  if (m.type === "hello") { W.available = !!m.winget; refreshInstallButtons(); }
+  else if (m.type === "scan") {
+    if (m.installed != null) W.installed = parseInstalled(m.installed);
+    if (m.upgrades != null) W.upgrades = parseUpgrades(m.upgrades);
+    refreshInstallButtons();
+  } else if (m.type === "progress") {
+    const id = String(m.id).toLowerCase(), it = [...APPS.values()].find(x => x.w && x.w.toLowerCase() === id);
+    if (m.state === "done") {
+      W.state.delete(id); W.installed.add(id); W.upgrades.delete(id);
+      if (it) toast(T("installDone", it.n));
+    } else if (m.state === "error") {
+      W.state.set(id, "error:" + (m.code ?? "?"));
+      if (it) toast(T("installErr", it.n));
+    } else if (m.state === "cancelled") W.state.delete(id);
+    else W.state.set(id, m.state);
+    refreshInstallButtons();
+  } else if (m.type === "update") {
+    updState = m.state === "none" ? null : {state: m.state, version: m.version, url: m.url};
+    renderUpdate();
+  }
+});
+send({cmd: "ready", lang});
+
+// ---- language switch ---------------------------------------------------------------------
+document.getElementById("lang").addEventListener("click", e => {
+  const b = e.target.closest("button[data-l]"); if (!b || b.dataset.l === lang) return;
+  lang = b.dataset.l;
+  try { localStorage.setItem("toolbox.lang", lang); } catch {}
+  rerender();
+  main.classList.remove("swap"); void main.offsetWidth; main.classList.add("swap");
+  send({cmd: "lang", lang});
+});
+
+// theme
+const root = document.documentElement, tb = document.getElementById("theme");
+const setTheme = t => { root.dataset.theme = t; tb.textContent = t === "light" ? "☾" : "☀"; try { localStorage.setItem("theme", t); } catch {} };
+let saved = null; try { saved = localStorage.getItem("theme"); } catch {}
+setTheme(saved || (matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark"));
+tb.onclick = () => setTheme(root.dataset.theme === "light" ? "dark" : "light");
+
+updateEditInfo();
+updateSel();
+document.body.dataset.ready = "1";   // checked by tools/check-page.mjs
+})();
+</script>
+</body>
+</html>
