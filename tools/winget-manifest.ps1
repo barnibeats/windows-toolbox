@@ -1,6 +1,6 @@
 # Writes winget manifests (version, installer, defaultLocale) for a released WindowsToolbox.exe.
 # The release workflow attaches them as winget-manifests.zip; submitting them to
-# microsoft/winget-pkgs is a manual pull request (see README).
+# microsoft/winget-pkgs is a manual pull request (see CONTRIBUTING.md).
 #
 #   .\tools\winget-manifest.ps1 -Version v1.2.0 -Exe WindowsToolbox.exe -Out winget
 param(
@@ -52,7 +52,7 @@ Publisher: $owner
 PublisherUrl: https://github.com/$owner
 PackageName: Windows Toolbox
 PackageUrl: https://github.com/$Repo
-License: Proprietary
+License: MIT
 ShortDescription: A catalog of open-source Windows apps with one-click downloads and winget installs.
 Description: Personalization, gaming, administration and system tweaking apps from GitHub, built-in Windows tricks and handy commands. English, Ukrainian and Russian.
 Tags:

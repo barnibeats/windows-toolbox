@@ -1,5 +1,5 @@
 {
-  "$comment": "Windows Toolbox catalog. One app per line: n = name, r = owner/repo or URL, w = winget ID (optional), archived = true keeps a known-archived app listed without a daily report (optional), d = description per language. A missing uk/en description falls back to ru.",
+  "$comment": "Windows Toolbox catalog. One app per line: n = name, r = owner/repo or URL, w = winget ID (optional), aka = old repo keys of an app that moved, so saved sets and shared links keep working (optional), archived = true keeps a known-archived app listed without a daily report (optional), d = description per language. A missing uk/en description falls back to ru.",
   "sections": [
     {"id": "custom", "icon": "🎨",
      "title": {"en":"Personalization","uk":"Персоналізація","ru":"Персонализация"},
@@ -20,7 +20,7 @@
         {"n":"ModernFlyouts","r":"ModernFlyouts-Community/ModernFlyouts","w":"ModernFlyouts.ModernFlyouts","archived":true,"d":{"en":"Modern volume and brightness flyouts","uk":"Сучасні спливаючі вікна гучності та яскравості","ru":"Современные всплывающие окна громкости и яркости"}}
       ]},
       {"name": {"en":"Wallpapers, widgets, theming","uk":"Шпалери, віджети, оформлення","ru":"Обои, виджеты, оформление"}, "items": [
-        {"n":"Lively Wallpaper","r":"lively-community/lively","w":"rocksdanister.LivelyWallpaper","d":{"en":"Live wallpapers: video, web pages, shaders","uk":"Живі шпалери: відео, вебсторінки, шейдери","ru":"Живые обои: видео, веб-страницы, шейдеры"}},
+        {"n":"Lively Wallpaper","r":"lively-community/lively","w":"rocksdanister.LivelyWallpaper","aka":["rocksdanister/lively"],"d":{"en":"Live wallpapers: video, web pages, shaders","uk":"Живі шпалери: відео, вебсторінки, шейдери","ru":"Живые обои: видео, веб-страницы, шейдеры"}},
         {"n":"WinDynamicDesktop","r":"t1m0thyj/WinDynamicDesktop","w":"t1m0thyj.WinDynamicDesktop","d":{"en":"macOS-style wallpapers that follow the time of day","uk":"Шпалери за часом доби, як у macOS","ru":"Обои по времени суток, как в macOS"}},
         {"n":"Rainmeter","r":"rainmeter/rainmeter","w":"Rainmeter.Rainmeter","d":{"en":"Desktop widgets","uk":"Віджети на робочому столі","ru":"Виджеты на рабочем столе"}},
         {"n":"Nilesoft Shell","r":"moudey/Shell","w":"Nilesoft.Shell","d":{"en":"Beautiful, customizable context menu","uk":"Гарне контекстне меню","ru":"Красивое контекстное меню"}},
@@ -60,11 +60,11 @@
       {"name": {"en":"Graphics & FPS","uk":"Графіка та FPS","ru":"Графика и FPS"}, "items": [
         {"n":"ReShade","r":"crosire/reshade","w":"Reshade.Setup","d":{"en":"In-game shaders and color grading","uk":"Шейдери та кольорокорекція в іграх","ru":"Шейдеры и цветокоррекция в играх"}},
         {"n":"Special K","r":"SpecialKO/SpecialK","w":"SpecialK.SpecialK","d":{"en":"HDR, FPS limiter, fixes for bad ports","uk":"HDR, ліміт FPS, фікси для портів","ru":"HDR, лимит FPS, фиксы для портов"}},
-        {"n":"OptiScaler","r":"optiscaler/OptiScaler","d":{"en":"DLSS → FSR/XeSS for AMD and Intel GPUs","uk":"DLSS → FSR/XeSS для AMD та Intel","ru":"DLSS → FSR/XeSS для AMD и Intel"}},
+        {"n":"OptiScaler","r":"optiscaler/OptiScaler","aka":["cdozdil/OptiScaler"],"d":{"en":"DLSS → FSR/XeSS for AMD and Intel GPUs","uk":"DLSS → FSR/XeSS для AMD та Intel","ru":"DLSS → FSR/XeSS для AMD и Intel"}},
         {"n":"Magpie","r":"Blinue/Magpie","w":"Blinue.Magpie","d":{"en":"Upscale any window with FSR/Anime4K","uk":"Апскейл будь-якого вікна через FSR/Anime4K","ru":"Апскейл любого окна через FSR/Anime4K"}},
         {"n":"NVIDIA Profile Inspector","r":"Orbmu2k/nvidiaProfileInspector","w":"Orbmu2k.nvidiaProfileInspector","d":{"en":"Hidden NVIDIA driver settings","uk":"Приховані налаштування драйвера NVIDIA","ru":"Скрытые настройки драйвера NVIDIA"}},
         {"n":"CapFrameX","r":"CXWorld/CapFrameX","w":"CXWorld.CapFrameX","d":{"en":"FPS and frametime capture and analysis","uk":"Вимірювання FPS і frametime","ru":"Замер FPS и frametime"}},
-        {"n":"Borderless Gaming","r":"andrewmd5/Borderless-Gaming","d":{"en":"Force borderless windowed mode","uk":"Віконний режим без рамок","ru":"Оконный режим без рамок"}},
+        {"n":"Borderless Gaming","r":"andrewmd5/Borderless-Gaming","aka":["Codeusa/Borderless-Gaming"],"d":{"en":"Force borderless windowed mode","uk":"Віконний режим без рамок","ru":"Оконный режим без рамок"}},
         {"n":"DXVK","r":"doitsujin/dxvk","d":{"en":"Vulkan instead of DirectX 9–11, rescues old games","uk":"Vulkan замість DirectX 9–11, рятує старі ігри","ru":"Vulkan вместо DirectX 9–11, спасает старые игры"}},
         {"n":"PresentMon","r":"GameTechDev/PresentMon","w":"Intel.PresentMon","d":{"en":"Intel's overlay and latency measurement","uk":"Оверлей і вимірювання затримок від Intel","ru":"Оверлей и замер задержек от Intel"}}
       ]},
@@ -72,7 +72,7 @@
         {"n":"Fan Control","r":"Rem0o/FanControl.Releases","w":"Rem0o.FanControl","d":{"en":"Custom fan curves","uk":"Криві вентиляторів","ru":"Кривые вентиляторов"}},
         {"n":"LibreHardwareMonitor","r":"LibreHardwareMonitor/LibreHardwareMonitor","w":"LibreHardwareMonitor.LibreHardwareMonitor","d":{"en":"Temperatures, clocks, load","uk":"Температури, частоти, навантаження","ru":"Температуры, частоты, нагрузка"}},
         {"n":"OpenRGB","r":"https://gitlab.com/CalcProgrammer1/OpenRGB","w":"OpenRGB.OpenRGB","d":{"en":"RGB control for any brand (GitLab)","uk":"Підсвітка будь-яких брендів (GitLab)","ru":"Подсветка любых брендов (GitLab)"}},
-        {"n":"Raw Accel","r":"RawAccelOfficial/rawaccel","d":{"en":"Mouse acceleration curves","uk":"Криві прискорення миші","ru":"Кривые ускорения мыши"}},
+        {"n":"Raw Accel","r":"RawAccelOfficial/rawaccel","aka":["a1xd/rawaccel"],"d":{"en":"Mouse acceleration curves","uk":"Криві прискорення миші","ru":"Кривые ускорения мыши"}},
         {"n":"DS4Windows","r":"schmaldeo/DS4Windows","archived":true,"d":{"en":"DualShock and DualSense on PC","uk":"DualShock і DualSense на ПК","ru":"DualShock и DualSense на ПК"}},
         {"n":"Handheld Companion","r":"Valkirie/HandheldCompanion","w":"BenjaminLSR.HandheldCompanion","d":{"en":"For ROG Ally, Legion Go and other handhelds","uk":"Для ROG Ally, Legion Go тощо","ru":"Для ROG Ally, Legion Go и др."}},
         {"n":"SoundSwitch","r":"Belphemur/SoundSwitch","w":"AntoineAflalo.SoundSwitch","d":{"en":"Switch audio devices with a hotkey","uk":"Перемикання аудіопристроїв гарячою клавішею","ru":"Переключение аудиоустройств хоткеем"}},
@@ -83,7 +83,7 @@
         {"n":"Monitorian","r":"emoacht/Monitorian","w":"emoacht.Monitorian","d":{"en":"Brightness control for every monitor","uk":"Яскравість для кожного монітора","ru":"Яркость для каждого монитора"}}
       ]},
       {"name": {"en":"Streaming & playing with friends","uk":"Стрімінг і гра з друзями","ru":"Стриминг и игра с друзьями"}, "items": [
-        {"n":"Sunshine","r":"SunshineStream/Sunshine","w":"LizardByte.Sunshine","d":{"en":"Game streaming host for your PC","uk":"Сервер стрімінгу ігор з ПК","ru":"Сервер стриминга игр с ПК"}},
+        {"n":"Sunshine","r":"SunshineStream/Sunshine","w":"LizardByte.Sunshine","aka":["LizardByte/Sunshine"],"d":{"en":"Game streaming host for your PC","uk":"Сервер стрімінгу ігор з ПК","ru":"Сервер стриминга игр с ПК"}},
         {"n":"Apollo","r":"ClassicOldSong/Apollo","w":"ClassicOldSong.Apollo","d":{"en":"Sunshine fork with a virtual display","uk":"Форк Sunshine з віртуальним дисплеєм","ru":"Форк Sunshine с виртуальным дисплеем"}},
         {"n":"Moonlight","r":"moonlight-stream","w":"MoonlightGameStreamingProject.Moonlight","d":{"en":"Client for phone, TV, laptop","uk":"Клієнт для телефона, ТВ, ноутбука","ru":"Клиент для телефона, ТВ, ноутбука"}},
         {"n":"OBS Studio","r":"obsproject/obs-studio","w":"OBSProject.OBSStudio","d":{"en":"Recording and streaming","uk":"Запис і стрімінг","ru":"Запись и стриминг"}},
@@ -213,7 +213,7 @@
         {"n":"Lenovo Legion Toolkit","r":"BartoszCichecki/LenovoLegionToolkit","w":"BartoszCichecki.LenovoLegionToolkit","archived":true,"d":{"en":"Lenovo Vantage replacement for Legion","uk":"Заміна Lenovo Vantage для Legion","ru":"Замена Lenovo Vantage для Legion"}},
         {"n":"NoteBook FanControl","r":"hirschmann/nbfc","w":"Hirschmann.NotebookFanControl","d":{"en":"Laptop fan control","uk":"Керування вентиляторами ноутбуків","ru":"Управление вентиляторами ноутбуков"}},
         {"n":"Universal x86 Tuning Utility","r":"JamesCJ60/Universal-x86-Tuning-Utility","w":"JamesCJ60.Universalx86TuningUtility","d":{"en":"TDP and undervolting for Intel and AMD","uk":"TDP і андервольт для Intel та AMD","ru":"TDP и андервольт для Intel и AMD"}},
-        {"n":"AlienFX Tools","r":"T-Troll/alien-tools","d":{"en":"Lighting and fans for Alienware/Dell","uk":"Підсвітка та вентилятори Alienware/Dell","ru":"Подсветка и вентиляторы Alienware/Dell"}},
+        {"n":"AlienFX Tools","r":"T-Troll/alien-tools","aka":["T-Troll/alienfx-tools"],"d":{"en":"Lighting and fans for Alienware/Dell","uk":"Підсвітка та вентилятори Alienware/Dell","ru":"Подсветка и вентиляторы Alienware/Dell"}},
         {"n":"RyzenAdj","r":"FlyGoat/RyzenAdj","d":{"en":"Power and temperature limits for Ryzen laptops","uk":"Ліміти живлення й температури для ноутбуків Ryzen","ru":"Лимиты питания и температуры для ноутбуков Ryzen"}}
       ]},
       {"name": {"en":"Automation & keyboard","uk":"Автоматизація та клавіатура","ru":"Автоматизация и клавиатура"}, "items": [
@@ -281,7 +281,7 @@
         {"n":"Chocolatey","r":"chocolatey/choco","w":"Chocolatey.Chocolatey","d":{"en":"Package manager for organizations","uk":"Пакетний менеджер для організацій","ru":"Пакетный менеджер для организаций"}},
         {"n":"Winget-AutoUpdate","r":"Romanitho/Winget-AutoUpdate","w":"Romanitho.Winget-AutoUpdate","d":{"en":"Auto-update apps, configurable via GPO","uk":"Автооновлення програм через GPO","ru":"Автообновление программ через GPO"}},
         {"n":"PSAppDeployToolkit","r":"PSAppDeployToolkit/PSAppDeployToolkit","d":{"en":"Silent app deployment","uk":"Тихе встановлення програм","ru":"Тихая установка программ"}},
-        {"n":"Bulk Crap Uninstaller","r":"BCUninstaller/Bulk-Crap-Uninstaller","w":"Klocman.BulkCrapUninstaller","d":{"en":"Bulk uninstall including leftovers","uk":"Масове видалення програм","ru":"Массовое удаление программ"}},
+        {"n":"Bulk Crap Uninstaller","r":"BCUninstaller/Bulk-Crap-Uninstaller","w":"Klocman.BulkCrapUninstaller","aka":["Klocman/Bulk-Crap-Uninstaller"],"d":{"en":"Bulk uninstall including leftovers","uk":"Масове видалення програм","ru":"Массовое удаление программ"}},
         {"n":"WuMgr","r":"DavidXanatos/wumgr","d":{"en":"Manual Windows Update control","uk":"Ручне керування оновленнями","ru":"Ручное управление обновлениями"}}
       ]},
       {"name": {"en":"Console & access","uk":"Консоль і доступ","ru":"Консоль и доступ"}, "items": [
@@ -300,7 +300,7 @@
         {"n":"Angry IP Scanner","r":"angryip/ipscan","w":"angryziber.AngryIPScanner","d":{"en":"Fast network scanner","uk":"Швидкий сканер мережі","ru":"Быстрый сканер сети"}},
         {"n":"Zabbix","r":"zabbix/zabbix","d":{"en":"Server and PC monitoring","uk":"Моніторинг серверів і ПК","ru":"Мониторинг серверов и ПК"}},
         {"n":"GLPI","r":"glpi-project/glpi","d":{"en":"Asset inventory and helpdesk","uk":"Облік обладнання та хелпдеск","ru":"Учёт оборудования и хелпдеск"}},
-        {"n":"Snipe-IT","r":"grokability/snipe-it","d":{"en":"IT asset management","uk":"Облік IT-активів","ru":"Учёт IT-активов"}},
+        {"n":"Snipe-IT","r":"grokability/snipe-it","aka":["snipe/snipe-it"],"d":{"en":"IT asset management","uk":"Облік IT-активів","ru":"Учёт IT-активов"}},
         {"n":"IntuneManagement","r":"Micke-K/IntuneManagement","d":{"en":"Export and document Intune settings","uk":"Експорт налаштувань Intune","ru":"Экспорт настроек Intune"}},
         {"n":"Uptime Kuma","r":"louislam/uptime-kuma","d":{"en":"Beautiful uptime monitoring","uk":"Гарний моніторинг доступності сервісів","ru":"Красивый мониторинг доступности сервисов"}},
         {"n":"OCS Inventory","r":"OCSInventory-NG/OCSInventory-ocsreports","d":{"en":"Automatic hardware and software inventory","uk":"Автоінвентаризація ПК і софту","ru":"Автоинвентаризация ПК и софта"}},
@@ -329,7 +329,7 @@
         {"n":"DriverStore Explorer","r":"lostindark/DriverStoreExplorer","w":"lostindark.DriverStoreExplorer","d":{"en":"Clean old drivers out of the driver store","uk":"Очищення старих драйверів зі сховища","ru":"Чистка старых драйверов из хранилища"}},
         {"n":"HardeningKitty","r":"scipag/HardeningKitty","d":{"en":"Audit against CIS benchmarks","uk":"Аудит за CIS-бенчмарками","ru":"Аудит по CIS-бенчмаркам"}},
         {"n":"Harden Windows Security","r":"HotCakeX/Harden-Windows-Security","d":{"en":"Harden Windows security","uk":"Посилення захисту","ru":"Усиление защиты"}},
-        {"n":"PingCastle","r":"netwrix/pingcastle","d":{"en":"Active Directory security audit","uk":"Аудит Active Directory","ru":"Аудит Active Directory"}},
+        {"n":"PingCastle","r":"netwrix/pingcastle","aka":["vletoux/pingcastle"],"d":{"en":"Active Directory security audit","uk":"Аудит Active Directory","ru":"Аудит Active Directory"}},
         {"n":"Wazuh","r":"wazuh/wazuh","d":{"en":"Open-source SIEM/XDR","uk":"Відкрита SIEM/XDR","ru":"Открытая SIEM/XDR"}},
         {"n":"KeePassXC","r":"keepassxreboot/keepassxc","w":"KeePassXCTeam.KeePassXC","d":{"en":"Password manager","uk":"Менеджер паролів","ru":"Менеджер паролей"}},
         {"n":"Sysinternals Suite","r":"https://learn.microsoft.com/sysinternals/","w":"Microsoft.Sysinternals.Suite","d":{"en":"Autoruns, ProcMon, PsExec (not on GitHub)","uk":"Autoruns, ProcMon, PsExec (не GitHub)","ru":"Autoruns, ProcMon, PsExec (не GitHub)"}},
@@ -388,7 +388,7 @@
         {"n":"PolicyPlus","r":"Fleex255/PolicyPlus","w":"Fleex255.PolicyPlus","d":{"en":"Group Policy editor for Windows Home","uk":"Групові політики в Windows Home","ru":"Групповые политики в Windows Home"}},
         {"n":"ConfigureDefender","r":"AndyFul/ConfigureDefender","d":{"en":"Hidden Defender settings","uk":"Приховані налаштування Defender","ru":"Скрытые настройки Defender"}},
         {"n":"Total Registry","r":"zodiacon/TotalRegistry","d":{"en":"Advanced registry editor","uk":"Просунутий редактор реєстру","ru":"Продвинутый редактор реестра"}},
-        {"n":"Flyoobe (ex-Flyby11)","r":"builtbybel/Flyoobe","d":{"en":"Upgrade unsupported PCs to Windows 11","uk":"Оновлення до Windows 11 на непідтримуваних ПК","ru":"Обновление до Windows 11 на неподдерживаемых ПК"}},
+        {"n":"Flyoobe (ex-Flyby11)","r":"builtbybel/Flyoobe","aka":["builtbybel/Flyby11"],"d":{"en":"Upgrade unsupported PCs to Windows 11","uk":"Оновлення до Windows 11 на непідтримуваних ПК","ru":"Обновление до Windows 11 на неподдерживаемых ПК"}},
         {"n":"LTSC-Add-MicrosoftStore","r":"kkkgo/LTSC-Add-MicrosoftStore","d":{"en":"Microsoft Store on LTSC","uk":"Microsoft Store в LTSC","ru":"Microsoft Store в LTSC"}}
       ]}
      ],
@@ -403,7 +403,7 @@
         {"n":"ScreenToGif","r":"NickeManarin/ScreenToGif","w":"NickeManarin.ScreenToGif","d":{"en":"Record the screen to GIF","uk":"Запис екрана в GIF","ru":"Запись экрана в GIF"}},
         {"n":"AltSnap","r":"RamonUnch/AltSnap","w":"AltSnap.AltSnap","d":{"en":"Move and resize windows with Alt","uk":"Перетягування вікон з Alt","ru":"Перетаскивание окон с Alt"}},
         {"n":"LocalSend","r":"localsend/localsend","w":"LocalSend.LocalSend","d":{"en":"Share files over Wi-Fi, like AirDrop","uk":"Обмін файлами по Wi-Fi, аналог AirDrop","ru":"Обмен файлами по Wi-Fi, аналог AirDrop"}},
-        {"n":"UniGetUI","r":"Devolutions/UniGetUI","w":"Devolutions.UniGetUI","d":{"en":"GUI store for winget/Scoop/Choco","uk":"Графічний магазин для winget/Scoop/Choco","ru":"Графический магазин для winget/Scoop/Choco"}},
+        {"n":"UniGetUI","r":"Devolutions/UniGetUI","w":"Devolutions.UniGetUI","aka":["marticliment/UniGetUI"],"d":{"en":"GUI store for winget/Scoop/Choco","uk":"Графічний магазин для winget/Scoop/Choco","ru":"Графический магазин для winget/Scoop/Choco"}},
         {"n":"NanaZip","r":"M2Team/NanaZip","w":"M2Team.NanaZip","d":{"en":"Modern 7-Zip","uk":"Сучасний 7-Zip","ru":"Современный 7-Zip"}},
         {"n":"ImageGlass","r":"d2phap/ImageGlass","w":"DuongDieuPhap.ImageGlass","d":{"en":"Image viewer","uk":"Переглядач зображень","ru":"Просмотрщик картинок"}},
         {"n":"Ambie","r":"jenius-apps/ambie","d":{"en":"Ambient sounds for focus","uk":"Фонові звуки для концентрації","ru":"Фоновые звуки для концентрации"}}

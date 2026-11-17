@@ -63,3 +63,12 @@ test("dependabot keeps the actions up to date monthly", () => {
   assert.ok(u, "github-actions ecosystem");
   assert.equal(u.schedule.interval, "monthly");
 });
+
+test("the winget manifest declares the repository's MIT license and its header points at real docs", () => {
+  const text = read("tools/winget-manifest.ps1");
+  assert.match(text, /^License: MIT$/m);
+  assert.ok(!/Proprietary/.test(text));
+  assert.match(read("LICENSE"), /^MIT License/);
+  assert.match(text, /see CONTRIBUTING\.md/);
+  assert.match(read("CONTRIBUTING.md"), /wingetcreate/);
+});

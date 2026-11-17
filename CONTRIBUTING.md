@@ -60,3 +60,9 @@ git push origin v1.3.1
 ```
 
 The tag builds `WindowsToolbox.exe`, signs it when the Azure secrets are set, publishes the release with the winget manifests, and refreshes `latest.json` on GitHub Pages, which installed apps read. The catalog itself is published on every push to `main` and every day.
+
+To make the app installable with `winget install barnibeats.WindowsToolbox`, submit the manifests from the release to [microsoft/winget-pkgs](https://github.com/microsoft/winget-pkgs). For the first release, copy the `manifests` folder from `winget-manifests.zip` into a fork and open a pull request. For later releases this is easier:
+
+```powershell
+wingetcreate update barnibeats.WindowsToolbox --version 1.3.1 --urls <link to the exe in the release> --submit
+```

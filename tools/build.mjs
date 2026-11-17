@@ -25,7 +25,7 @@ const checkI18n = (v, where, required = LANGS) => {
   if (!v || typeof v !== "object") return errors.push(`${where}: expected text or {en, uk, ru}`);
   for (const l of required) if (!isText(v[l])) errors.push(`${where}: missing "${l}"`);
 };
-const seenRepos = new Map(), seenIds = new Set();
+const seenRepos = new Map(), seenIds = new Set(), akaSeen = new Map();
 let apps = 0;
 (catalog.sections || []).forEach((s, si) => {
   const where = `sections[${si}] (${s.id || "?"})`;
@@ -57,10 +57,20 @@ let apps = 0;
       const key = (it.r || "").toLowerCase();
       if (seenRepos.has(key)) errors.push(`${w}: duplicate of ${seenRepos.get(key)}`);
       seenRepos.set(key, w);
+      if (it.aka !== undefined) {   // old repo keys of an app that moved: saved sets and shared links that use them keep working
+        if (!Array.isArray(it.aka) || it.aka.some(a => !isText(a))) errors.push(`${w}: "aka" must be a list of old repo keys`);
+        else for (const a of it.aka) {
+          const k = a.toLowerCase();
+          if (k === key) errors.push(`${w}: aka "${a}" is the app's own key`);
+          else if (akaSeen.has(k)) errors.push(`${w}: aka "${a}" is already used by ${akaSeen.get(k)}`);
+          else akaSeen.set(k, w);
+        }
+      }
     });
   });
 });
 if (!apps) errors.push("catalog has no apps");
+for (const [k, where] of akaSeen) if (seenRepos.has(k)) errors.push(`${where}: aka "${k}" is the repo of ${seenRepos.get(k)}`);
 for (const k of Object.keys(catalog.downloadOverrides || {}))
   if (!seenRepos.has(k.toLowerCase())) warnings.push(`downloadOverrides["${k}"] matches no app`);
 
