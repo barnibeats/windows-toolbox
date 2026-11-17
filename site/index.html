@@ -131,8 +131,9 @@ body.selecting .pick{visibility:visible}
 
 /* Windows tricks and safety */
 .keys{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:8px}
-.key{display:flex;gap:12px;align-items:center;padding:8px 12px;background:var(--panel);border:1px solid var(--line);border-radius:6px}
-.combo{display:flex;gap:4px;align-items:center;flex:none}
+.key{display:flex;gap:12px;align-items:center;min-width:0;padding:8px 12px;background:var(--panel);border:1px solid var(--line);border-radius:6px}
+.key>span:last-child{min-width:0;overflow-wrap:anywhere}
+.combo{display:flex;gap:4px;align-items:center;flex:none;flex-wrap:wrap;max-width:60%}
 .combo .pl{color:var(--ink2)}
 .tips{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:8px}
 .tip{padding:10px 14px;background:var(--panel);border:1px solid var(--line);border-radius:6px}
@@ -200,7 +201,7 @@ footer a{color:inherit}
   .tool .t{display:none}
   .brand{font-size:1.1rem}
   #ver{display:none}
-  .keys,.tips{grid-template-columns:1fr}
+  .keys,.tips{grid-template-columns:minmax(0,1fr)}
   body.selecting .toast{bottom:190px}
   body.selecting .layout{padding-bottom:230px}
 }

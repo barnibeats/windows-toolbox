@@ -33,7 +33,7 @@ before(async () => { browser = await chromium.launch({ executablePath, headless:
 after(async () => { await browser?.close(); });
 
 /** Opens the page in a fresh browser context. With host:true a fake WebView2 bridge is installed. */
-async function openPage({ host = false, lang = "en", viewport = { width: 1280, height: 900 }, storage = {}, hash = "", appv = "1.3.0" } = {}) {
+async function openPage({ host = false, lang = "en", viewport = { width: 1280, height: 900 }, storage = {}, hash = "", appv = "1.3.0", wideFonts = false } = {}) {
   const context = await browser.newContext({ viewport });
   await context.addInitScript(({ host, storage }) => {
     try { if (!sessionStorage.__seeded) { for (const [k, v] of Object.entries(storage)) localStorage.setItem(k, v); sessionStorage.__seeded = "1"; } } catch {}
@@ -57,6 +57,8 @@ async function openPage({ host = false, lang = "en", viewport = { width: 1280, h
   const qs = `?lang=${lang}` + (host ? `&host=2&appv=${appv}` : "");
   await page.goto(PAGE + qs + hash);
   await page.waitForSelector('body[data-ready="1"]');
+  // phones, Macs and Linux do not have Bahnschrift or Segoe UI: emulate their wider fallback fonts
+  if (wideFonts) await page.addStyleTag({ content: ":root{--disp:Verdana,\"DejaVu Sans\",sans-serif;--text:Verdana,\"DejaVu Sans\",sans-serif}" });
   return {
     page, context, errors,
     sent: () => page.evaluate(() => window.__sent.slice()),
@@ -378,6 +380,20 @@ test("keyboard focus is visible on the set bar and on command blocks, in both th
       assert.equal(r.style, "solid", `${theme} ${target}: focus ring drawn (${r.tag})`);
       assert.notEqual(r.outline, r.bg, `${theme} ${target}: outline ${r.outline} on ${r.bg}`);
     }
+    await t.close();
+  }
+});
+
+test("375px wide with wide fallback fonts (Linux, Android, iOS): no horizontal scroll, also in select mode", async () => {
+  for (const lang of ["en", "uk", "ru"]) {
+    const t = await openPage({ lang, viewport: { width: 375, height: 800 }, host: true, wideFonts: true });
+    await t.fromHost({ type: "hello", winget: true });
+    await pick(t, A, B);
+    const over = await t.page.evaluate(() => [...document.querySelectorAll("body *")]
+      .filter(e => e.getBoundingClientRect().right > innerWidth + 0.5 && getComputedStyle(e).position !== "fixed" && e.offsetParent !== null)
+      .slice(0, 5).map(e => e.tagName + "." + e.className + "#" + e.id));
+    const [sw, iw] = await t.page.evaluate(() => [document.scrollingElement.scrollWidth, innerWidth]);
+    assert.ok(sw <= iw, `${lang}: scrollWidth ${sw} > ${iw}; wide elements: ${over.join(", ")}`);
     await t.close();
   }
 });
