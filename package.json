@@ -6,16 +6,18 @@
   "scripts": {
     "check": "node tools/build.mjs --check --strict",
     "build": "node tools/build.mjs",
-    "test": "npm run check && npm run test:build && npm run build && node tools/check-page.mjs && npm run test:ui && npm run test:docs",
+    "test": "npm run check && npm run test:build && npm run test:workflows && npm run build && node tools/check-page.mjs && npm run test:ui && npm run test:docs",
     "test:ui": "node --test tools/test-ui.mjs",
     "test:build": "node --test tools/test-build.mjs",
     "test:docs": "node tools/check-docs.mjs",
-    "screenshots": "node tools/build.mjs && node tools/screenshots.mjs"
+    "screenshots": "node tools/build.mjs && node tools/screenshots.mjs",
+    "test:workflows": "node --test tools/test-workflows.mjs"
   },
   "engines": {
     "node": ">=22"
   },
   "devDependencies": {
-    "playwright-core": "^1.65.1"
+    "playwright-core": "^1.65.1",
+    "yaml": "^2.9.1"
   }
 }

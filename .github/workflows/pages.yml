@@ -1,0 +1,103 @@
+# Publishes the page and latest.json to GitHub Pages: https://barnibeats.github.io/windows-toolbox/
+# Installed apps read both from there on every launch.
+#
+#   push to main / daily / manual:
+#     resolve downloads and check links -> run the whole test suite -> publish
+#   Problems found in the catalog (repository deleted, moved, bad winget ID) go to an issue with the
+#   label catalog-check. If the catalog or the page is broken, nothing is published and users keep
+#   the working version.
+#
+# latest.json is generated from the latest GitHub release, so it can never disagree with Releases.
+name: Pages
+
+on:
+  push:
+    branches: [main]
+  schedule:
+    - cron: "17 4 * * *"   # every day at 04:17 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+  issues: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Resolve downloads and check links
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if ! node tools/resolve.mjs; then
+            echo "::warning::Could not resolve downloads, reusing the data of the published page"
+            curl -fsSL "https://${GITHUB_REPOSITORY_OWNER}.github.io/${GITHUB_REPOSITORY#*/}/index.html" -o _published.html || : > _published.html
+            node -e '
+              const m = require("fs").readFileSync("_published.html", "utf8").match(/<script id="downloads-data" type="application\/json">([\s\S]*?)<\/script>/);
+              require("fs").writeFileSync("downloads.json", m && m[1].trim() ? m[1] : "{}");'
+          fi
+
+      - name: Test (catalog, page, interface, docs)
+        run: npm test
+
+      - name: Report catalog problems
+        if: hashFiles('problems.md') != ''
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          num=$(gh issue list --label catalog-check --state open --json number -q '.[0].number')
+          if grep -q '^No problems found' problems.md; then
+            if [ -n "$num" ]; then gh issue close "$num" --comment "All clear on $(date -u +%F)."; fi
+          else
+            gh label create catalog-check --color FBCA04 --description "Automatic catalog check" 2>/dev/null || true
+            if [ -n "$num" ]; then gh issue edit "$num" --body-file problems.md
+            else gh issue create --title "Catalog check: problems found" --label catalog-check --body-file problems.md; fi
+          fi
+
+      - name: Assemble the site (page and latest.json)
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          mkdir _site
+          cp dist/index.html _site/index.html
+          if gh release view --json tagName,assets > release.json 2>/dev/null; then
+            node -e '
+              const r = JSON.parse(require("fs").readFileSync("release.json", "utf8"));
+              const a = (r.assets || []).find(x => x.name === "WindowsToolbox.exe");
+              if (a) require("fs").writeFileSync("_site/latest.json", JSON.stringify({
+                version: r.tagName,
+                url: `https://github.com/${process.env.GITHUB_REPOSITORY}/releases/download/${r.tagName}/WindowsToolbox.exe`,
+                size: a.size }) + "\n");'
+          fi
+          ls -la _site
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

@@ -1,0 +1,26 @@
+# Runs the whole suite on every pull request and on pushes to branches other than main:
+# catalog validation, page build, page smoke test, interface tests in a real browser, docs links.
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches-ignore: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - run: npm test
