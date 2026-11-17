@@ -5,13 +5,13 @@ import { dirname, join, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
-const SKIP = new Set(["node_modules", ".git", ".superpowers", "dist"]);
+const SKIP = new Set(["node_modules", "dist"]);   // dot-folders other than .github are skipped too
 const problems = [];
 
 const mdFiles = [];
 (function walk(dir) {
   for (const name of readdirSync(dir)) {
-    if (SKIP.has(name)) continue;
+    if (SKIP.has(name) || (name.startsWith(".") && name !== ".github")) continue;
     const p = join(dir, name);
     if (statSync(p).isDirectory()) walk(p); else if (name.endsWith(".md")) mdFiles.push(p);
   }

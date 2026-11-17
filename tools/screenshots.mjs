@@ -5,6 +5,7 @@ import { execFileSync } from "node:child_process";
 import { dirname, join } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { chromium } from "playwright-core";
+import { findBrowser } from "./browser.mjs";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const page = join(root, "dist", "index.html");
@@ -15,10 +16,7 @@ mkdirSync(out, { recursive: true });
 const catalog = JSON.parse(readFileSync(join(root, "catalog.json"), "utf8"));
 const appCount = catalog.sections.reduce((n, s) => n + (s.groups || []).reduce((m, g) => m + g.items.length, 0), 0);
 
-const candidates = [process.env.CHROME, "google-chrome", "google-chrome-stable", "chromium", "chromium-browser",
-  "C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe", "C:/Program Files/Microsoft/Edge/Application/msedge.exe",
-  "C:/Program Files/Google/Chrome/Application/chrome.exe"].filter(Boolean);
-const executablePath = candidates.find(b => { try { execFileSync(b, ["--version"], { stdio: "ignore" }); return true; } catch { return existsSync(b); } });
+const executablePath = findBrowser();
 if (!executablePath) throw new Error("no Chrome/Edge found (set CHROME=<path>)");
 const browser = await chromium.launch({ executablePath });
 

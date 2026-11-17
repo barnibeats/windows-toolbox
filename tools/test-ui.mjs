@@ -10,6 +10,7 @@ import { execFileSync } from "node:child_process";
 import { dirname, join } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { chromium } from "playwright-core";
+import { findBrowser } from "./browser.mjs";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const pageFile = process.env.PAGE_FILE || join(root, "dist", "index.html");
@@ -24,11 +25,7 @@ const [A, B] = withW, C = withoutW[0];
 assert.ok(A && B && C, "catalog needs two apps with a winget id and one without");
 
 // ---- browser ---------------------------------------------------------------------------------
-const candidates = [process.env.CHROME, "google-chrome", "google-chrome-stable", "chromium", "chromium-browser",
-  "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe",
-  "C:\\Program Files\\Microsoft\\Edge\\Application\\msedge.exe",
-  "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe"].filter(Boolean);
-const executablePath = candidates.find(b => { try { execFileSync(b, ["--version"], { stdio: "ignore" }); return true; } catch { return existsSync(b); } });
+const executablePath = findBrowser();
 if (!executablePath) throw new Error("no Chrome/Edge found (set CHROME=<path>)");
 
 let browser;

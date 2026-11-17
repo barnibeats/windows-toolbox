@@ -10,5 +10,3 @@ problems.md
 winget/
 winget-manifests.zip
 node_modules/
-# local executor scratch
-.superpowers/
