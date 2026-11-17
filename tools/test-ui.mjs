@@ -307,3 +307,42 @@ test("offline notice (#offline) appears when the connection drops and disappears
   await t.page.waitForSelector("#offline", { state: "hidden" });
   await t.close();
 });
+
+// ---- 16-18 behaviours added with the redesign ----------------------------------------------
+test("'/' focuses the search and Escape clears it", async () => {
+  const t = await openPage();
+  await t.page.keyboard.press("/");
+  assert.equal(await t.page.evaluate(() => document.activeElement.id), "q");
+  await t.page.keyboard.type("windhawk");
+  assert.ok((await t.page.locator("div.card:visible").count()) < items.length);
+  await t.page.keyboard.press("Escape");
+  assert.equal(await t.page.inputValue("#q"), "");
+  assert.equal(await t.page.locator("div.card:visible").count(), items.length);
+  await t.close();
+});
+
+test("the set bar prints the winget command for the picks, live", async () => {
+  const t = await openPage();
+  await t.page.click("#selBtn");
+  const idle = await t.page.textContent("#selCmd");
+  assert.ok(!idle.includes("winget install"), "idle text before any pick");
+  await pick(t, A, C);
+  assert.equal(await t.page.textContent("#selCmd"), `winget install --id ${A.w}`);
+  await pick(t, B);
+  assert.equal(await t.page.textContent("#selCmd"), `winget install --id ${A.w}; winget install --id ${B.w}`);
+  await t.page.click("#selClear");
+  assert.equal(await t.page.textContent("#selCmd"), idle);
+  await t.close();
+});
+
+test("tricks and safety sections render every entry and the copy button copies the command", async () => {
+  const t = await openPage();
+  assert.equal(await t.page.locator(".key").count(), catalog.keys.length);
+  assert.equal(await t.page.locator(".tip").count(), catalog.tips.length);
+  assert.equal(await t.page.locator(".cmd").count(), catalog.cmds.length);
+  assert.equal(await t.page.locator(".warn li").count(), catalog.safety.length);
+  await t.page.locator(".cmd .copy").first().evaluate(el => el.click());
+  await t.page.waitForFunction(() => window.__clip);
+  assert.equal(await t.clip(), catalog.cmds[0].c.en);
+  await t.close();
+});
