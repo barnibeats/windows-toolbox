@@ -74,7 +74,7 @@ async function resolveApp(it) {
     else if (r.ok) {
       const j = await r.json();
       rec.st = roundStars(j.stargazers_count);
-      if (j.archived) { rec.ar = 1; problems.push([it, "repository is archived"]); }
+      if (j.archived) { rec.ar = 1; if (!it.archived) problems.push([it, "repository is archived"]); }   // it.archived: known and kept on purpose
       if (j.full_name.toLowerCase() !== it.r.toLowerCase()) problems.push([it, `repository moved to \`${j.full_name}\``]);
     }
   }
