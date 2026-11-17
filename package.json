@@ -1,0 +1,12 @@
+{
+  "name": "windows-toolbox",
+  "private": true,
+  "type": "module",
+  "description": "Catalog of free open-source Windows apps and a portable app to install them.",
+  "scripts": {
+    "check": "node tools/build.mjs --check",
+    "build": "node tools/build.mjs",
+    "test": "npm run check && npm run build && node tools/check-page.mjs"
+  },
+  "engines": { "node": ">=22" }
+}
