@@ -4,10 +4,11 @@
   "type": "module",
   "description": "Catalog of free open-source Windows apps and a portable app to install them.",
   "scripts": {
-    "check": "node tools/build.mjs --check",
+    "check": "node tools/build.mjs --check --strict",
     "build": "node tools/build.mjs",
-    "test": "npm run check && npm run build && node tools/check-page.mjs && npm run test:ui",
-    "test:ui": "node --test tools/test-ui.mjs"
+    "test": "npm run check && npm run test:build && npm run build && node tools/check-page.mjs && npm run test:ui",
+    "test:ui": "node --test tools/test-ui.mjs",
+    "test:build": "node --test tools/test-build.mjs"
   },
   "engines": {
     "node": ">=22"

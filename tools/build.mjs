@@ -3,6 +3,8 @@
 //
 //   node tools/build.mjs            → dist/index.html (from site/index.html)
 //   node tools/build.mjs --check    → validate catalog.json only
+//   node tools/build.mjs --strict   → warnings (missing en/uk text) fail the build too
+//   CATALOG=<path>                  → validate another catalog file (used by the tests)
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -12,7 +14,9 @@ const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const LANGS = ["en", "uk", "ru"];
 const errors = [], warnings = [];
 
-const catalog = JSON.parse(readFileSync(join(root, "catalog.json"), "utf8"));
+const catalogPath = process.env.CATALOG || join(root, "catalog.json");
+const strict = process.argv.includes("--strict");
+const catalog = JSON.parse(readFileSync(catalogPath, "utf8"));
 
 // ---- validation -----------------------------------------------------------------------
 const isText = v => typeof v === "string" && v.trim() !== "";
@@ -34,6 +38,13 @@ let apps = 0;
   if (!s.groups && !s.special) errors.push(`${where}: needs "groups" or "special"`);
   (s.groups || []).forEach((g, gi) => {
     checkI18n(g.name, `${where}.groups[${gi}].name`);
+    if (g.note !== undefined) {   // optional text shown under the group title; ru required, en/uk fall back to it
+      const nw = `${where}.groups[${gi}].note`;
+      if (!isText(g.note)) {
+        if (!g.note || typeof g.note !== "object" || !isText(g.note.ru)) errors.push(`${nw}: missing Russian text "ru"`);
+        else for (const l of ["en", "uk"]) if (!isText(g.note[l])) warnings.push(`${nw}: no "${l}" text (falls back to ru)`);
+      }
+    }
     (g.items || []).forEach((it, ii) => {
       const w = `${where} › ${typeof g.name === "string" ? g.name : g.name?.en} › ${it.n || "#" + ii}`;
       apps++;
@@ -53,7 +64,8 @@ if (!apps) errors.push("catalog has no apps");
 for (const k of Object.keys(catalog.downloadOverrides || {}))
   if (!seenRepos.has(k.toLowerCase())) warnings.push(`downloadOverrides["${k}"] matches no app`);
 
-for (const w of warnings) console.log("warning:", w);
+if (!strict) for (const w of warnings) console.log("warning:", w);
+if (strict) errors.push(...warnings.map(w => `${w} (--strict)`));
 if (errors.length) {
   for (const e of errors) console.error("error:", e);
   console.error(`\ncatalog.json has ${errors.length} error(s) — nothing was built.`);
