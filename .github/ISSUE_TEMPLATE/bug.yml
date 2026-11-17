@@ -1,0 +1,36 @@
+name: Report a bug
+description: Something in the app or the page does not work
+labels: ["bug"]
+body:
+  - type: dropdown
+    id: where
+    attributes:
+      label: Where does it happen?
+      options:
+        - Desktop app (WindowsToolbox.exe)
+        - Web page in a browser
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: App version
+      description: Shown next to the title in the desktop app.
+      placeholder: v1.3.0
+  - type: input
+    id: system
+    attributes:
+      label: Windows and browser
+      placeholder: Windows 11 23H2, Edge 130
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+      description: Steps to reproduce, and what you expected instead. Screenshots help.
+    validations:
+      required: true
+  - type: textarea
+    id: extra
+    attributes:
+      label: Anything else
+      description: For a broken download or install, name the app and paste the message shown.

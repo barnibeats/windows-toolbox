@@ -1,0 +1,56 @@
+name: Suggest an app
+description: Propose a free open-source app for the catalog
+title: "Add: "
+labels: ["catalog"]
+body:
+  - type: input
+    id: repo
+    attributes:
+      label: Repository or website
+      description: A GitHub link, or the official site for projects that live elsewhere.
+      placeholder: https://github.com/owner/repo
+    validations:
+      required: true
+  - type: input
+    id: winget
+    attributes:
+      label: winget ID
+      description: Optional. Run `winget search <name>` to find it.
+      placeholder: Publisher.Package
+  - type: dropdown
+    id: section
+    attributes:
+      label: Section
+      options:
+        - Personalization
+        - For gamers
+        - Media
+        - Browsers
+        - Messengers
+        - Local AI
+        - Development
+        - Reverse engineering
+        - Utilities
+        - For sysadmins
+        - Windows tweaking
+        - More useful stuff
+    validations:
+      required: true
+  - type: textarea
+    id: why
+    attributes:
+      label: What does it do, and why should it be listed?
+      description: Two sentences are enough. Say what it replaces or what it is best at.
+    validations:
+      required: true
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checks
+      options:
+        - label: It is free and open source.
+          required: true
+        - label: It runs on Windows.
+          required: true
+        - label: It is maintained, or still useful as it is.
+          required: true

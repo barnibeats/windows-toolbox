@@ -107,7 +107,6 @@ body.selecting .pick{visibility:visible}
 .meta:empty{display:none}
 .chip{padding:1px 9px;border-radius:99px;background:color-mix(in srgb,var(--ink) 8%,transparent);color:var(--ink2);font-size:.75rem}
 .chip.warn{background:color-mix(in srgb,var(--bad) 16%,transparent);color:var(--bad)}
-.chip.inst{color:var(--ok)}
 .st{display:none;margin-top:6px;font-size:.8rem;color:var(--ink2)}
 .st.show{display:block}
 .acts{display:flex;gap:6px;align-items:center;justify-content:flex-end}
@@ -441,7 +440,6 @@ function metaHTML(p, it) {
   if (m.st != null) h += `<span class="chip" title="${esc(T("starsTitle"))}">★ ${stars(m.st)}</span>`;
   if (m.t) h += `<span class="chip" title="${esc(T("relTitle"))}">${esc(m.t.length > 16 ? m.t.slice(0, 15) + "…" : m.t)}${m.at ? ", " + esc(ago(m.at)) : ""}</span>`;
   if (m.ar) h += `<span class="chip warn">${T("archived")}</span>`;
-  if (it && it.w && HOST && W.installed.has(it.w.toLowerCase())) h += `<span class="chip inst">✓ ${T("installed")}</span>`;
   return `<div class="meta">${h}</div>`;
 }
 const cardHTML = it => {
