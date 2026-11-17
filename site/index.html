@@ -4,396 +4,273 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
 <title>Windows Toolbox</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
 <style>
+/* Windows Toolbox: steel and graphite with one safety-yellow accent.
+   Yellow means "current" or "chosen": the active section, picked rows, the set bar.
+   No external fonts: Bahnschrift (DIN-style, ships with Windows 10/11) for names, Segoe UI for text. */
 :root{
-  --bg:#07080f; --bg2:#0e1020; --card:rgba(255,255,255,.045); --card-h:rgba(255,255,255,.08);
-  --border:rgba(255,255,255,.09); --text:#e8eaf6; --muted:#9097b8;
-  --a1:#7c5cff; --a2:#00d4ff; --a3:#ff4fd8; --ok:#3ddc97;
+  --bg:#E8EBED; --panel:#FFFFFF; --ink:#1C2125; --ink2:#4B565E; --line:#D3D8DC; --line2:#BFC7CC;
+  --acc:#FFC20E; --acc-ink:#1C2125; --ok:#17794B; --bad:#B3261E; --plate:#1C2125; --plate-ink:#F4F6F7;
+  --focus:#1C2125; --shadow:0 12px 32px rgba(20,28,34,.30);
+  --disp:"Bahnschrift","DIN Alternate","Arial Narrow","Segoe UI Variable Display","Segoe UI",system-ui,sans-serif;
+  --text:"Segoe UI Variable Text","Segoe UI",system-ui,-apple-system,"Helvetica Neue",Arial,sans-serif;
+  --mono:"Cascadia Mono",Consolas,"SF Mono",Menlo,monospace;
 }
-:root[data-theme="light"]{
-  --bg:#f4f6ff; --bg2:#e9ecff; --card:rgba(255,255,255,.75); --card-h:#fff;
-  --border:rgba(20,30,80,.10); --text:#141833; --muted:#5a6185;
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#14181B; --panel:#1D2327; --ink:#E9EDEF; --ink2:#9AA6AD; --line:#2A3238; --line2:#3B464E;
+    --ok:#4CC38A; --bad:#FF8A80; --plate:#2C353B; --plate-ink:#F4F6F7; --focus:#FFC20E; --shadow:0 12px 32px rgba(0,0,0,.6);
+  }
 }
-*{box-sizing:border-box;margin:0;padding:0}
-html{scroll-behavior:smooth}
-body{font-family:Inter,system-ui,sans-serif;background:var(--bg);color:var(--text);line-height:1.55;overflow-x:hidden;transition:background .4s,color .4s}
-a{color:inherit;text-decoration:none}
-
-/* animated background */
-.bg{position:fixed;inset:0;z-index:-2;overflow:hidden}
-.blob{position:absolute;width:520px;height:520px;border-radius:50%;filter:blur(110px);opacity:.38;animation:float 22s ease-in-out infinite}
-.blob.b1{background:var(--a1);top:-120px;left:-120px}
-.blob.b2{background:var(--a2);bottom:-160px;right:-100px;animation-delay:-7s}
-.blob.b3{background:var(--a3);top:40%;left:45%;width:380px;height:380px;animation-delay:-14s;opacity:.22}
-@keyframes float{0%,100%{transform:translate(0,0) scale(1)}33%{transform:translate(120px,80px) scale(1.15)}66%{transform:translate(-80px,140px) scale(.9)}}
-.grid-bg{position:fixed;inset:0;z-index:-1;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:56px 56px;mask-image:radial-gradient(ellipse at 50% 0%,#000 30%,transparent 75%)}
-
-/* hero */
-header{max-width:1180px;margin:0 auto;padding:90px 16px 40px;text-align:center}
-.logo{display:inline-grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:28px;animation:spinIn 1.2s cubic-bezier(.2,.8,.2,1)}
-.logo span{width:30px;height:30px;border-radius:5px;background:linear-gradient(135deg,var(--a1),var(--a2))}
-.logo span:nth-child(2){background:linear-gradient(135deg,var(--a2),var(--ok))}
-.logo span:nth-child(3){background:linear-gradient(135deg,var(--a3),var(--a1))}
-.logo span:nth-child(4){background:linear-gradient(135deg,#ffb84f,var(--a3))}
-@keyframes spinIn{from{transform:rotate(-180deg) scale(0);opacity:0}to{transform:none;opacity:1}}
-h1{font-size:clamp(2.2rem,6vw,4.2rem);font-weight:800;letter-spacing:-.03em;line-height:1.05}
-.grad{background:linear-gradient(90deg,var(--a1),var(--a2),var(--a3),var(--a1));background-size:300% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:shine 8s linear infinite}
-@keyframes shine{to{background-position:300% 0}}
-.sub{color:var(--muted);max-width:640px;margin:18px auto 0;font-size:1.08rem}
-.stats{display:flex;justify-content:center;gap:34px;margin-top:34px;flex-wrap:wrap}
-.stat b{display:block;font-size:2rem;font-weight:800}
-.stat small{color:var(--muted)}
-
-/* nav */
-nav{position:sticky;top:0;z-index:20;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);background:color-mix(in srgb,var(--bg) 70%,transparent);border-bottom:1px solid var(--border)}
-.nav-in{max-width:1180px;margin:0 auto;padding:10px 16px;display:flex;gap:8px 10px;align-items:center;justify-content:center;flex-wrap:wrap}
-.tabs{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;flex:1 1 100%;scrollbar-width:none}
-.tabs::-webkit-scrollbar{display:none}
-.tab{white-space:nowrap;padding:8px 14px;border-radius:999px;border:1px solid var(--border);background:var(--card);color:var(--muted);font:500 .9rem Inter;cursor:pointer;transition:.25s}
-.tab:hover{color:var(--text);transform:translateY(-1px)}
-.tab.on{background:linear-gradient(135deg,var(--a1),var(--a2));color:#fff;border-color:transparent;box-shadow:0 6px 20px -6px var(--a1)}
-.search{position:relative;flex:0 1 420px;min-width:180px}
-.search input{width:100%;padding:9px 14px 9px 36px;border-radius:999px;border:1px solid var(--border);background:var(--card);color:var(--text);font:inherit;outline:none;transition:.25s}
-.search input:focus{border-color:var(--a2);box-shadow:0 0 0 4px color-mix(in srgb,var(--a2) 20%,transparent)}
-.search svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);opacity:.6}
-.theme{width:38px;height:38px;border-radius:50%;border:1px solid var(--border);background:var(--card);color:var(--text);cursor:pointer;font-size:1.05rem;transition:transform .5s}
-.theme:hover{transform:rotate(180deg)}
-
-/* sections */
-main{max-width:1180px;margin:0 auto;padding:30px 16px 80px}
-section{margin-top:56px;scroll-margin-top:130px}
-.sec-h{display:flex;align-items:center;gap:14px;margin-bottom:6px}
-.sec-ic{font-size:1.7rem;width:52px;height:52px;display:grid;place-items:center;border-radius:14px;background:linear-gradient(135deg,color-mix(in srgb,var(--a1) 35%,transparent),color-mix(in srgb,var(--a2) 25%,transparent));border:1px solid var(--border)}
-h2{font-size:1.75rem;letter-spacing:-.02em}
-.sec-d{color:var(--muted);margin:4px 0 6px 66px}
-h3{font-size:.85rem;text-transform:uppercase;letter-spacing:.12em;color:var(--a2);margin:30px 0 14px;display:flex;align-items:center;gap:10px}
-h3::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,var(--border),transparent)}
-
-.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px}
-.card{position:relative;display:block;padding:18px 18px 16px;border-radius:16px;background:var(--card);border:1px solid var(--border);overflow:hidden;transition:transform .35s cubic-bezier(.2,.8,.2,1),background .3s,border-color .3s,box-shadow .35s;opacity:0;transform:translateY(24px)}
-.card.vis{opacity:1;transform:none}
-.card::before{content:"";position:absolute;inset:0;background:radial-gradient(400px circle at var(--mx,50%) var(--my,50%),color-mix(in srgb,var(--a1) 22%,transparent),transparent 45%);opacity:0;transition:opacity .3s}
-.card:hover{transform:translateY(-4px);background:var(--card-h);border-color:color-mix(in srgb,var(--a1) 50%,var(--border));box-shadow:0 18px 40px -18px color-mix(in srgb,var(--a1) 60%,transparent)}
-.card:hover::before{opacity:1}
-.card-t{position:relative;display:flex;align-items:center;justify-content:space-between;gap:8px;font-weight:600;font-size:1.02rem}
-.card-t .arr{opacity:.4;transition:.3s;font-size:.95rem}
-.card:hover .arr{opacity:1;transform:translate(3px,-3px);color:var(--a2)}
-.card p{position:relative;color:var(--muted);font-size:.9rem;margin-top:6px}
-.host{position:relative;display:inline-block;margin-top:10px;font:500 .72rem "JetBrains Mono";color:var(--muted);padding:2px 8px;border-radius:6px;border:1px solid var(--border)}
-.card{display:flex;flex-direction:column}
-.card .host{align-self:flex-start}
-
-/* edit mode */
-.edit{height:38px;padding:0 14px;border-radius:999px;border:1px solid var(--border);background:var(--card);color:var(--text);font:600 .88rem Inter;cursor:pointer;transition:.25s;white-space:nowrap}
-.edit:hover{border-color:var(--a2)}
-.edit.on{background:linear-gradient(135deg,#ff9f43,var(--a3));color:#fff;border-color:transparent;box-shadow:0 6px 20px -6px var(--a3)}
-.editbar{display:none;max-width:1180px;margin:0 auto;padding:0 16px 10px;align-items:center;justify-content:center;gap:8px 14px;flex-wrap:wrap;font-size:.88rem;color:var(--muted)}
-body.editing .editbar{display:flex;animation:slideDown .3s ease}
-@keyframes slideDown{from{opacity:0;transform:translateY(-8px)}}
-.editbar .btns{display:flex;gap:8px;flex-wrap:wrap}
-.editbar .btn{flex:0 0 auto;padding:6px 12px}
-.btn.danger:hover{border-color:#ff4d6d;color:#ff4d6d}
-.rm{position:absolute;top:10px;right:10px;z-index:3;width:28px;height:28px;border-radius:50%;border:1px solid var(--border);background:var(--bg2);color:var(--muted);cursor:pointer;display:none;place-items:center;font-size:.85rem;transition:.25s}
-.rm:hover{background:#ff4d6d;color:#fff;border-color:transparent;transform:rotate(90deg)}
-body.editing .rm{display:grid}
-body.editing .card-t .arr{visibility:hidden}
-body.editing .card{border-style:dashed}
-.mine-tag{font:600 .64rem Inter;padding:2px 7px;border-radius:999px;background:color-mix(in srgb,var(--a3) 22%,transparent);color:var(--a3);margin-left:8px;vertical-align:2px;letter-spacing:.02em}
-.card.out{animation:cardOut .3s forwards;pointer-events:none}
-@keyframes cardOut{to{opacity:0;transform:scale(.85)}}
-.card.new{animation:cardPop .5s cubic-bezier(.2,.8,.2,1)}
-@keyframes cardPop{0%{opacity:0;transform:scale(.85)}60%{transform:scale(1.03)}100%{opacity:1;transform:none}}
-.add-card{display:none;min-height:170px;border-radius:16px;border:2px dashed color-mix(in srgb,var(--a2) 45%,var(--border));background:transparent;color:var(--a2);font:600 .92rem Inter;cursor:pointer;flex-direction:column;align-items:center;justify-content:center;gap:8px;transition:.25s}
-.add-card b{font-size:2rem;line-height:1;font-weight:400;transition:transform .3s}
-.add-card:hover{background:color-mix(in srgb,var(--a2) 8%,transparent);transform:translateY(-3px)}
-.add-card:hover b{transform:rotate(90deg)}
-body.editing .add-card{display:flex}
-body:not(.editing) .group:not(:has(.card)){display:none}
-
-dialog{margin:auto;border:1px solid var(--border);border-radius:20px;padding:0;background:var(--bg2);color:var(--text);width:min(540px,calc(100vw - 32px));box-shadow:0 30px 80px -20px rgba(0,0,0,.6)}
-dialog[open]{animation:cardPop .35s cubic-bezier(.2,.8,.2,1)}
-dialog::backdrop{background:rgba(5,6,12,.6);backdrop-filter:blur(6px)}
-dialog form{padding:24px;display:grid;gap:14px}
-dialog h2{font-size:1.3rem}
-dialog label{display:grid;gap:6px;font-size:.85rem;color:var(--muted)}
-dialog [hidden]{display:none}
-dialog input,dialog select{padding:10px 12px;border-radius:10px;border:1px solid var(--border);background:var(--bg);color:var(--text);font:inherit;outline:none;width:100%}
-dialog input:focus,dialog select:focus{border-color:var(--a2);box-shadow:0 0 0 3px color-mix(in srgb,var(--a2) 20%,transparent)}
-dialog .row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-dialog .hint{font:500 .75rem "JetBrains Mono";color:var(--muted);min-height:1em;margin-top:-8px}
-dialog .hint.ok{color:var(--ok)}
-dialog .err{color:#ff6b81;font-size:.85rem;min-height:1em}
-dialog .dlg-acts{display:flex;gap:10px;justify-content:flex-end}
-dialog .dlg-acts .btn{flex:0 0 auto;padding:10px 18px}
-
-.toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,30px);opacity:0;pointer-events:none;z-index:50;display:flex;gap:14px;align-items:center;padding:10px 10px 10px 18px;border-radius:14px;background:var(--bg2);border:1px solid var(--border);box-shadow:0 20px 50px -15px rgba(0,0,0,.6);transition:.3s;font-size:.9rem;max-width:calc(100vw - 32px)}
-.toast.show{opacity:1;transform:translate(-50%,0);pointer-events:auto}
-.toast button{padding:7px 14px;border-radius:9px;border:none;cursor:pointer;font:600 .85rem Inter;color:#fff;background:linear-gradient(135deg,var(--a1),var(--a2))}
-@media (max-width:600px){ dialog .row{grid-template-columns:1fr} }
-
-.upd{position:fixed;left:50%;top:14px;transform:translateX(-50%);z-index:60;display:flex;align-items:center;gap:12px;padding:8px 8px 8px 18px;border-radius:14px;background:var(--bg2);border:1px solid color-mix(in srgb,var(--a2) 50%,var(--border));box-shadow:0 20px 50px -15px color-mix(in srgb,var(--a1) 70%,transparent);font-size:.9rem;max-width:calc(100vw - 32px);flex-wrap:wrap;animation:slideDown .4s ease}
-.upd[hidden]{display:none}
-.upd .btn{flex:0 0 auto;padding:7px 14px}
-.upd-x{width:30px;height:30px;border-radius:50%;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer}
-#ver{opacity:.7;font:500 .75rem "JetBrains Mono"}
-.card-t a::after{content:"";position:absolute;inset:0;z-index:1}
-.card-t a:focus-visible{outline:none}
-.card:has(.card-t a:focus-visible){border-color:var(--a2)}
-.acts{position:relative;z-index:2;display:flex;gap:8px;margin-top:auto;padding-top:14px}
-.btn{flex:1;display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:8px 10px;border-radius:10px;font:600 .82rem Inter;cursor:pointer;border:1px solid var(--border);background:var(--bg2);color:var(--text);transition:transform .2s,box-shadow .25s,background .25s,border-color .25s;white-space:nowrap}
-.btn:hover{transform:translateY(-1px);border-color:var(--a2)}
-.btn.dl{border-color:transparent;color:#fff;background:linear-gradient(135deg,var(--a1),var(--a2));background-size:150% 150%;box-shadow:0 6px 18px -8px var(--a1)}
-.btn.dl:hover{box-shadow:0 10px 26px -8px var(--a2);background-position:100% 0}
-.btn.dl .ic{display:inline-block;transition:transform .3s}
-.btn.dl:hover .ic{animation:bounce .7s ease infinite}
-@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(3px)}}
-.btn.dl.busy{pointer-events:none;opacity:.85}
-.btn.dl.busy .ic{animation:spin .8s linear infinite}
-@keyframes spin{to{transform:rotate(360deg)}}
-.btn.dl.ok{background:linear-gradient(135deg,#2bb673,var(--ok));color:#05210f}
-.btn.dl.alt{background:linear-gradient(135deg,#ff9f43,#ffb84f);color:#2a1600}
-.st{position:relative;z-index:2;min-height:0;font:500 .72rem "JetBrains Mono";color:var(--muted);margin-top:0;max-height:0;overflow:hidden;transition:max-height .3s,margin-top .3s;word-break:break-all}
-.st.show{max-height:60px;margin-top:8px}
-
-/* hotkeys */
-.keys{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:10px}
-.key{display:flex;align-items:center;gap:14px;padding:12px 16px;border-radius:14px;background:var(--card);border:1px solid var(--border);opacity:0;transform:translateY(24px);transition:.5s cubic-bezier(.2,.8,.2,1)}
-.key.vis{opacity:1;transform:none}
-.combo{display:flex;gap:4px;flex-wrap:wrap;flex-shrink:0}
-kbd{font:600 .78rem "JetBrains Mono";padding:4px 8px;border-radius:7px;background:var(--bg2);border:1px solid var(--border);border-bottom-width:3px;box-shadow:0 2px 0 rgba(0,0,0,.2)}
-.key span{color:var(--muted);font-size:.9rem}
-
-.tips{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px}
-.tip{padding:18px;border-radius:16px;background:var(--card);border:1px solid var(--border);opacity:0;transform:translateY(24px);transition:.5s cubic-bezier(.2,.8,.2,1)}
-.tip.vis{opacity:1;transform:none}
-.tip b{display:block;margin-bottom:6px}
-.tip span{color:var(--muted);font-size:.9rem}
-code{font-family:"JetBrains Mono";font-size:.82em;padding:1px 6px;border-radius:5px;background:var(--bg2);border:1px solid var(--border);word-break:break-all}
-
-.cmds{display:grid;gap:12px}
-.cmd{border-radius:14px;border:1px solid var(--border);background:var(--bg2);overflow:hidden;opacity:0;transform:translateY(24px);transition:.5s cubic-bezier(.2,.8,.2,1)}
-.cmd.vis{opacity:1;transform:none}
-.cmd-h{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;border-bottom:1px solid var(--border);color:var(--muted);font-size:.88rem}
-.cmd-h .dots{display:flex;gap:6px;margin-right:10px}
-.cmd-h .dots i{width:10px;height:10px;border-radius:50%;background:#ff5f57}
-.cmd-h .dots i:nth-child(2){background:#febc2e}.cmd-h .dots i:nth-child(3){background:#28c840}
-.copy{font:500 .8rem Inter;padding:5px 12px;border-radius:8px;border:1px solid var(--border);background:var(--card);color:var(--text);cursor:pointer;transition:.2s}
-.copy:hover{border-color:var(--a2)}
-.copy.done{background:var(--ok);color:#06210f;border-color:transparent}
-pre{padding:14px 16px;overflow-x:auto;font:400 .86rem/1.6 "JetBrains Mono";color:var(--a2)}
-
-.warn{display:grid;gap:10px;counter-reset:w}
-.warn li{list-style:none;position:relative;padding:14px 16px 14px 58px;border-radius:14px;background:var(--card);border:1px solid var(--border);opacity:0;transform:translateX(-20px);transition:.5s}
-.warn li.vis{opacity:1;transform:none}
-.warn li::before{counter-increment:w;content:counter(w);position:absolute;left:16px;top:50%;transform:translateY(-50%);width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:.85rem;background:linear-gradient(135deg,#ffb84f,var(--a3));color:#fff}
-
-.note{margin-top:14px;padding:12px 16px;border-radius:12px;border:1px dashed color-mix(in srgb,#ffb84f 60%,transparent);color:var(--muted);font-size:.9rem}
-.empty{display:none;text-align:center;color:var(--muted);padding:60px 0;font-size:1.1rem}
-.hidden{display:none!important}
-
-footer{text-align:center;color:var(--muted);font-size:.85rem;padding:30px 16px 50px}
-.top{position:fixed;right:20px;bottom:20px;width:46px;height:46px;border-radius:50%;border:none;cursor:pointer;background:linear-gradient(135deg,var(--a1),var(--a2));color:#fff;font-size:1.2rem;box-shadow:0 10px 30px -8px var(--a1);opacity:0;transform:translateY(20px);transition:.3s;pointer-events:none}
-.top.show{opacity:1;transform:none;pointer-events:auto}
-#progress{position:fixed;top:0;left:0;height:3px;width:0;z-index:30;background:linear-gradient(90deg,var(--a1),var(--a2),var(--a3))}
-
-@media (max-width:600px){
-  header{padding-top:60px}
-  .sec-d{margin-left:0}
-  .keys{grid-template-columns:1fr}
-  .key{flex-direction:column;align-items:flex-start;gap:8px}
-  .tabs{flex-wrap:nowrap;justify-content:flex-start;overflow-x:auto}
-  .search{flex:1 1 auto}
+:root[data-theme="dark"]{
+  --bg:#14181B; --panel:#1D2327; --ink:#E9EDEF; --ink2:#9AA6AD; --line:#2A3238; --line2:#3B464E;
+  --ok:#4CC38A; --bad:#FF8A80; --plate:#2C353B; --plate-ink:#F4F6F7; --focus:#FFC20E; --shadow:0 12px 32px rgba(0,0,0,.6);
 }
-@media (prefers-reduced-motion:reduce){
-  *,*::before{animation:none!important;transition:none!important}
-  .card,.key,.tip,.cmd,.warn li{opacity:1;transform:none}
-}
-
-/* language switch */
-.lang{display:flex;gap:2px;padding:3px;border-radius:999px;border:1px solid var(--border);background:var(--card)}
-.lang button{border:none;background:transparent;color:var(--muted);font:600 .78rem Inter;letter-spacing:.04em;padding:7px 10px;border-radius:999px;cursor:pointer;transition:.25s}
-.lang button:hover{color:var(--text)}
-.lang button.on{background:linear-gradient(135deg,var(--a1),var(--a2));color:#fff;box-shadow:0 4px 14px -6px var(--a1)}
-main.swap{animation:langSwap .35s ease}
-@keyframes langSwap{from{opacity:.25;transform:translateY(6px)}}
-
-/* the hidden attribute always wins over component display rules (.btn, label, …) */
+*{box-sizing:border-box}
+html{scroll-padding-top:calc(var(--hh,72px) + var(--rh,0px) + 14px)}
+@media (prefers-reduced-motion:no-preference){html{scroll-behavior:smooth}}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 var(--text);-webkit-font-smoothing:antialiased}
 [hidden]{display:none!important}
+a{color:inherit}
+:focus-visible{outline:3px solid var(--focus);outline-offset:2px;border-radius:4px}
+button{font:inherit;color:inherit}
+kbd{font:600 .8rem var(--mono);background:var(--panel);border:1px solid var(--line2);border-bottom-width:2px;border-radius:4px;padding:1px 7px}
 
-/* card facts: stars, version, date, badges */
-.meta{position:relative;display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:10px}
-.card .meta .host{margin-top:0}
-.chip{font:500 .72rem "JetBrains Mono";color:var(--muted);padding:2px 8px;border-radius:6px;background:color-mix(in srgb,var(--text) 6%,transparent);white-space:nowrap}
-.chip.warn{color:#ffb84f;background:color-mix(in srgb,#ffb84f 15%,transparent)}
-.chip.inst{color:var(--ok);background:color-mix(in srgb,var(--ok) 15%,transparent)}
+/* top bar: brand, the search (the hero of the page), tools */
+.top{position:sticky;top:0;z-index:30;display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:18px;align-items:center;padding:10px 20px;background:var(--panel);border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:10px;font:700 1.3rem/1 var(--disp);font-stretch:92%;letter-spacing:.2px;white-space:nowrap}
+.brand{min-width:0}
+.brand svg{flex:none}
+.bn{min-width:0;overflow:hidden;text-overflow:ellipsis}
+#ver{font:500 .75rem var(--text);color:var(--ink2)}
+.search{position:relative;display:block;width:100%;max-width:680px;justify-self:center}
+.search svg{position:absolute;left:14px;top:50%;translate:0 -50%;color:var(--ink2);pointer-events:none}
+.search input{width:100%;height:46px;padding:0 14px 0 42px;border:2px solid var(--ink);border-radius:8px;background:var(--bg);color:var(--ink);font:500 1.05rem var(--text)}
+.search input::placeholder{color:var(--ink2)}
+.search input:focus-visible{outline:0;box-shadow:0 0 0 4px var(--acc)}
+.tools{display:flex;align-items:center;gap:8px}
+.lang{display:flex;border:1px solid var(--line2);border-radius:6px;overflow:hidden}
+.lang button{border:0;background:transparent;padding:0 10px;height:32px;font:600 .8rem var(--text);cursor:pointer}
+.lang button+button{border-left:1px solid var(--line2)}
+.lang button.on{background:var(--ink);color:var(--panel)}
+.tool{height:32px;min-width:32px;padding:0 12px;border:1px solid var(--line2);border-radius:6px;background:transparent;font:600 .85rem var(--text);cursor:pointer}
+.tool:hover{background:color-mix(in srgb,var(--ink) 7%,transparent)}
+.tool.on{background:var(--acc);border-color:var(--acc);color:var(--acc-ink)}
+.upd{display:flex;gap:12px;align-items:center;justify-content:center;flex-wrap:wrap;padding:8px 16px;background:var(--acc);color:var(--acc-ink);font-weight:600}
+.upd .btn{border-color:var(--acc-ink)}
+.upd-x{border:0;background:transparent;cursor:pointer;font-size:1.1rem;line-height:1;padding:4px 8px}
+.offline{padding:6px 16px;text-align:center;background:var(--bad);color:#fff;font-weight:600}
+:root[data-theme="dark"] .offline{color:#1D2327}
 
-/* install via winget (desktop app only): it takes its own full-width row under GitHub + Download */
-.acts{flex-wrap:wrap}
-.acts .btn{min-width:0}
-.acts .btn .lb{overflow:hidden;text-overflow:ellipsis}
-.btn.inst{flex:1 1 100%}
-.acts .btn.gh{flex:0 0 auto;padding:8px 14px}
-.btn.gh.compact{flex:0 0 40px;padding:8px 0}
-.btn.inst{border-color:color-mix(in srgb,var(--ok) 55%,var(--border));color:var(--ok)}
-.btn.inst:hover{background:color-mix(in srgb,var(--ok) 12%,transparent);border-color:var(--ok)}
-.btn.inst.done{opacity:.7;cursor:default;transform:none}
-.btn.inst.upg{border-color:#ffb84f;color:#ffb84f}
-.btn.inst.busy{pointer-events:none}
-.btn.inst.busy .ic{display:inline-block;animation:spin .8s linear infinite}
-.btn.inst.err{border-color:#ff6b81;color:#ff6b81}
+/* layout: section rail + list */
+.layout{display:grid;grid-template-columns:230px minmax(0,1fr);gap:28px;max-width:1280px;margin:0 auto;padding:20px}
+.rail{position:sticky;top:calc(var(--hh,72px) + 14px);align-self:start;max-height:calc(100vh - var(--hh,72px) - 28px);overflow:auto}
+.tabs{display:flex;flex-direction:column;gap:2px}
+.tab{display:grid;grid-template-columns:24px 1fr auto;gap:8px;align-items:center;text-align:left;width:100%;padding:8px 10px;border:0;border-radius:6px;background:transparent;cursor:pointer;font:600 .95rem var(--disp);font-stretch:95%}
+.tab:hover{background:color-mix(in srgb,var(--ink) 6%,transparent)}
+.tab.on{background:var(--panel);box-shadow:inset 4px 0 0 var(--acc),0 0 0 1px var(--line)}
+.tab .tn{font:500 .75rem var(--text);color:var(--ink2)}
+.tab .ti{text-align:center}
 
-/* select mode + sets */
-.pick{position:absolute;top:10px;right:10px;z-index:3;display:none;width:26px;height:26px}
-.pick input{position:absolute;inset:0;margin:0;opacity:0;cursor:pointer}
-.pick span{display:grid;place-items:center;width:26px;height:26px;border-radius:8px;border:2px solid var(--border);background:var(--bg2);transition:.2s;pointer-events:none}
-.pick input:checked + span{background:linear-gradient(135deg,var(--a1),var(--a2));border-color:transparent}
-.pick input:checked + span::after{content:"✓";color:#fff;font-weight:800;font-size:.85rem}
-.pick input:focus-visible + span{outline:2px solid var(--a2);outline-offset:2px}
-body.selecting .pick{display:block}
-body.selecting .card-t .arr{visibility:hidden}
-body.selecting .card.picked{border-color:color-mix(in srgb,var(--a2) 70%,transparent);background:color-mix(in srgb,var(--a2) 7%,var(--card))}
-.edit.sel.on{background:linear-gradient(135deg,var(--a1),var(--a2));box-shadow:0 6px 20px -6px var(--a1)}
-.selbar{position:fixed;left:50%;bottom:20px;transform:translate(-50%,40px);opacity:0;pointer-events:none;z-index:45;display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:8px;padding:10px 12px;border-radius:16px;background:var(--bg2);border:1px solid var(--border);box-shadow:0 20px 50px -15px rgba(0,0,0,.6);transition:.3s;max-width:calc(100vw - 32px)}
-body.selecting .selbar{opacity:1;transform:translate(-50%,0);pointer-events:auto}
-.selbar b{padding:0 6px;font-size:.9rem;white-space:nowrap}
-.selbar .btn{flex:0 0 auto;padding:8px 12px}
-.selbar .btn[disabled]{opacity:.45;pointer-events:none}
-body.selecting .toast{bottom:100px}
-body.selecting .top{bottom:100px}
+section{margin:0 0 44px}
+.sec-h{display:flex;gap:14px;align-items:center;margin-bottom:6px}
+.sec-ic{font-size:2rem;line-height:1}
+.sec-h h2{margin:0;font:700 1.9rem/1.1 var(--disp);font-stretch:92%}
+.sec-h p{margin:4px 0 0;color:var(--ink2);max-width:70ch}
+.group{margin-top:22px}
+.group h3{margin:0 0 8px}
+.plate{display:inline-block;padding:4px 12px;border-radius:4px;background:var(--plate);color:var(--plate-ink);font:600 .95rem var(--disp);font-stretch:95%}
+.gnote{margin:0 0 8px;color:var(--ink2);font-size:.9rem;max-width:70ch}
+.note{margin:18px 0 0;padding:10px 14px;border-left:4px solid var(--acc);background:var(--panel);border-radius:0 6px 6px 0;max-width:70ch}
+.sub{margin:26px 0 10px;font:600 1.15rem var(--disp)}
 
-/* offline notice */
-.offline{position:fixed;left:50%;top:14px;transform:translateX(-50%);z-index:61;padding:8px 16px;border-radius:12px;background:#3a1d24;color:#ffd5dc;border:1px solid #ff6b81;font-size:.88rem;max-width:calc(100vw - 32px);text-align:center;animation:slideDown .3s ease}
-:root[data-theme="light"] .offline{background:#ffe9ed;color:#7a1026}
-.offline[hidden]{display:none}
+/* app rows */
+.rows{background:var(--panel);border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.card{--pickw:0px;display:grid;grid-template-columns:var(--pickw) minmax(0,1fr) auto;align-items:center;padding:12px 16px 12px 12px;border-top:1px solid var(--line)}
+.rows>.card:first-child{border-top:0}
+body.selecting .card{--pickw:36px}
+.card:hover{background:color-mix(in srgb,var(--ink) 4%,var(--panel))}
+.card.picked{background:color-mix(in srgb,var(--acc) 16%,var(--panel));box-shadow:inset 4px 0 0 var(--acc)}
+.card.hidden,.group.hidden,section.hidden{display:none}
+.pick{display:grid;place-items:center;width:var(--pickw);overflow:hidden;visibility:hidden;cursor:pointer}
+body.selecting .pick{visibility:visible}
+.pick input{width:18px;height:18px;margin:0;accent-color:var(--ink);cursor:pointer}
+.info{min-width:0;padding-right:14px;padding-left:4px}
+.name{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.name a{font:600 1.08rem/1.25 var(--disp);font-stretch:95%;text-decoration:none}
+.name a:hover{text-decoration:underline;text-decoration-color:var(--acc);text-decoration-thickness:3px;text-underline-offset:3px}
+.repo{font-size:.78rem;color:var(--ink2);overflow-wrap:anywhere}
+.info p{margin:2px 0 0;color:var(--ink2);max-width:72ch}
+.meta{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.meta:empty{display:none}
+.chip{padding:1px 9px;border-radius:99px;background:color-mix(in srgb,var(--ink) 8%,transparent);color:var(--ink2);font-size:.75rem}
+.chip.warn{background:color-mix(in srgb,var(--bad) 16%,transparent);color:var(--bad)}
+.chip.inst{color:var(--ok)}
+.st{display:none;margin-top:6px;font-size:.8rem;color:var(--ink2)}
+.st.show{display:block}
+.acts{display:flex;gap:6px;align-items:center;justify-content:flex-end}
 
-/* sets & script dialogs */
-.setlist{display:grid;gap:8px;max-height:45vh;overflow:auto}
-.setrow{display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:12px;border:1px solid var(--border);background:var(--bg)}
-.setrow span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.setrow small{color:var(--muted);white-space:nowrap}
-.setrow .btn{flex:0 0 auto;padding:6px 10px}
-dialog textarea{width:100%;min-height:230px;padding:12px;border-radius:10px;border:1px solid var(--border);background:var(--bg);color:var(--a2);font:400 .8rem/1.5 "JetBrains Mono";resize:vertical;outline:none}
-dialog .muted{color:var(--muted);font-size:.85rem}
-dialog .inline{display:flex;gap:8px}
-dialog .inline input{flex:1}
-dialog .inline .btn{flex:0 0 auto}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;height:32px;padding:0 12px;border:1px solid var(--line2);border-radius:6px;background:transparent;color:var(--ink);font:600 .85rem var(--text);text-decoration:none;white-space:nowrap;cursor:pointer}
+.btn:hover{background:color-mix(in srgb,var(--ink) 7%,transparent)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn.icon{width:32px;padding:0}
+.btn .ic{font-weight:700}
+.btn.dl.busy{opacity:.7;cursor:progress}
+.btn.dl.ok{color:var(--ok);border-color:var(--ok)}
+.btn.inst{border-color:var(--ink);color:var(--ink)}
+.btn.inst:hover{background:var(--ink);color:var(--panel)}
+.btn.inst.busy{opacity:.6;cursor:progress}
+.btn.inst.done,.btn.inst.done:hover{background:transparent;color:var(--ok);border-color:var(--ok)}
+.btn.inst.err{background:var(--bad);border-color:var(--bad);color:#fff}
+.btn.inst.upg,.btn.primary{background:var(--acc);border-color:var(--acc);color:var(--acc-ink)}
+.btn.primary:hover,.btn.inst.upg:hover{background:var(--acc);opacity:.9}
+
+.empty{padding:60px 16px;text-align:center;color:var(--ink2);font-size:1.05rem}
+
+/* Windows tricks and safety */
+.keys{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:8px}
+.key{display:flex;gap:12px;align-items:center;padding:8px 12px;background:var(--panel);border:1px solid var(--line);border-radius:6px}
+.combo{display:flex;gap:4px;align-items:center;flex:none}
+.combo .pl{color:var(--ink2)}
+.tips{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:8px}
+.tip{padding:10px 14px;background:var(--panel);border:1px solid var(--line);border-radius:6px}
+.tip b{display:block;font:600 1rem var(--disp);margin-bottom:2px}
+.tip span{color:var(--ink2)}
+.tip code,.warn code{font:.85em var(--mono);background:color-mix(in srgb,var(--ink) 8%,transparent);padding:1px 5px;border-radius:4px;overflow-wrap:anywhere}
+.cmds{display:grid;gap:10px}
+.cmd{background:var(--plate);color:var(--plate-ink);border-radius:8px;overflow:hidden}
+.cmd-h{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:8px 12px;font-weight:600}
+.cmd .copy{border:1px solid #56626A;border-radius:6px;background:transparent;color:var(--plate-ink);padding:3px 10px;cursor:pointer;font:600 .8rem var(--text)}
+.cmd .copy.done{color:#7DE0AE;border-color:#7DE0AE}
+.cmd pre{margin:0;padding:10px 12px 12px;background:#0F1316;color:#D7E3DC;font:.85rem/1.5 var(--mono);white-space:pre-wrap;overflow-wrap:anywhere}
+.warn{margin:0;padding-left:1.4rem;max-width:72ch}
+.warn li{margin:0 0 10px}
+
+/* the set bar: the one loud element. It appears when selecting and prints the command live. */
+.selbar{position:fixed;left:50%;bottom:16px;z-index:40;width:min(980px,calc(100% - 24px));display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:12px;align-items:center;padding:10px 12px;border-radius:10px;background:var(--plate);color:var(--plate-ink);box-shadow:var(--shadow);transform:translate(-50%,160%);visibility:hidden;transition:transform .28s cubic-bezier(.2,.8,.2,1),visibility 0s .28s}
+body.selecting .selbar{transform:translate(-50%,0);visibility:visible;transition:transform .28s cubic-bezier(.2,.8,.2,1)}
+#selCount{font:700 1.05rem var(--disp);white-space:nowrap}
+.selcmd{display:block;min-width:0;padding:8px 10px;border-radius:6px;background:#0F1316;color:#D7E3DC;font:.8rem/1.2 var(--mono);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.selcmd::before{content:"PS> ";color:var(--acc)}
+.selcmd.idle{color:#8794A0}
+.selbtns{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.selbar .btn{border-color:#56626A;color:var(--plate-ink)}
+.selbar .btn:hover{background:rgba(255,255,255,.1)}
+.selbar .btn.primary{background:var(--acc);border-color:var(--acc);color:var(--acc-ink)}
+.selbar .btn.danger{color:#FFB4AB}
+body.selecting .layout{padding-bottom:150px}
+
+dialog{width:min(580px,calc(100% - 24px));padding:0;border:0;border-radius:10px;background:var(--panel);color:var(--ink);box-shadow:var(--shadow)}
+dialog::backdrop{background:rgba(10,14,17,.55)}
+.dlg{padding:18px 20px 20px}
+.dlg h3{margin:0 0 12px;font:700 1.25rem var(--disp)}
+.dlg p{margin:0 0 10px;color:var(--ink2)}
+.dlg textarea,.dlg input[type=text]{width:100%;padding:10px;border:1px solid var(--line2);border-radius:6px;background:var(--bg);color:var(--ink);font:.85rem/1.45 var(--mono)}
+.dlg textarea{min-height:240px;resize:vertical}
+.dlg .row{display:flex;gap:8px;margin-top:12px;justify-content:flex-end;flex-wrap:wrap}
+.setrow{display:flex;gap:10px;align-items:center;padding:8px 0;border-top:1px solid var(--line)}
+.setrow:first-child{border-top:0}
+.setrow span{flex:1;min-width:0;font-weight:600;overflow-wrap:anywhere}
+.setrow small{color:var(--ink2)}
+.err-t{min-height:1.2em;margin:6px 0 0;color:var(--bad);font-size:.85rem}
+.btn.danger{color:var(--bad)}
+.toast{position:fixed;left:50%;bottom:24px;z-index:60;display:flex;gap:12px;align-items:center;max-width:calc(100% - 24px);padding:10px 16px;border-radius:8px;background:var(--ink);color:var(--panel);box-shadow:var(--shadow);opacity:0;pointer-events:none;transform:translate(-50%,16px);transition:opacity .2s,transform .2s}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+body.selecting .toast{bottom:104px}
+footer{max-width:1280px;margin:0 auto;padding:10px 20px 40px;color:var(--ink2);font-size:.85rem;text-align:center}
+footer a{color:inherit}
+
+@media (max-width:900px){
+  .top{grid-template-columns:minmax(0,1fr) auto;gap:10px 12px;padding:10px 12px}
+  .search{grid-column:1/-1;grid-row:2;max-width:none}
+  .layout{display:block;padding:0 12px 20px}
+  .rail{position:sticky;top:var(--hh,100px);z-index:20;max-height:none;overflow-x:auto;margin:0 -12px 8px;padding:8px 12px;background:var(--bg);border-bottom:1px solid var(--line)}
+  .tabs{flex-direction:row;gap:6px;width:max-content}
+  .tab{display:flex;gap:6px;width:auto;padding:6px 12px;border:1px solid var(--line2);border-radius:99px;white-space:nowrap}
+  .tab.on{box-shadow:none;background:var(--acc);border-color:var(--acc);color:var(--acc-ink)}
+  .tab .tn{display:none}
+  .sec-h h2{font-size:1.5rem}
+  .card{grid-template-columns:var(--pickw) minmax(0,1fr);row-gap:10px}
+  .acts{grid-column:2;justify-content:flex-start;flex-wrap:wrap}
+  .selbar{grid-template-columns:minmax(0,1fr) auto}
+  .selcmd{grid-column:1/-1;grid-row:2}
+  .selbtns{grid-column:1/-1;grid-row:3;justify-content:flex-start}
+  .tool .t{display:none}
+  .brand{font-size:1.1rem}
+  #ver{display:none}
+  .keys,.tips{grid-template-columns:1fr}
+  body.selecting .toast{bottom:190px}
+  body.selecting .layout{padding-bottom:230px}
+}
+@media (prefers-reduced-motion:reduce){.selbar,.toast{transition:none}}
 </style>
 </head>
 <body>
-<div id="progress"></div>
-<div class="bg"><div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div></div>
-<div class="grid-bg"></div>
 <div class="offline" id="offline" role="status" hidden data-i18n="offline"></div>
+<div class="upd" id="upd" hidden>
+  <span id="updMsg"></span>
+  <a class="btn" id="updLink" href="#" target="_blank" rel="noopener" hidden data-i18n="download"></a>
+  <button class="btn" id="updRestart" type="button" hidden data-i18n="restart"></button>
+  <button class="upd-x" id="updX" type="button" data-i18n-title="hide" aria-label="Hide">✕</button>
+</div>
 
-<header>
-  <div class="logo"><span></span><span></span><span></span><span></span></div>
-  <h1><span data-i18n="h1"></span> <span class="grad">Windows</span></h1>
-  <p class="sub" data-i18n="sub"></p>
-  <div class="stats">
-    <div class="stat"><b data-count="apps">0</b><small data-i18n="statApps"></small></div>
-    <div class="stat"><b data-count="keys">0</b><small data-i18n="statKeys"></small></div>
-    <div class="stat"><b data-count="secs">0</b><small data-i18n="statSecs"></small></div>
+<header class="top" id="top">
+  <div class="brand">
+    <svg width="30" height="30" viewBox="0 0 30 30" aria-hidden="true"><path d="M10 9V7a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v2" fill="none" stroke="currentColor" stroke-width="2.4"/><rect x="2.5" y="9" width="25" height="17" rx="3" fill="currentColor"/><rect x="2.5" y="15" width="25" height="4" fill="#FFC20E"/><rect x="12.5" y="13.5" width="5" height="7" rx="1" fill="#FFC20E" stroke="currentColor" stroke-width="1.6"/></svg>
+    <span class="bn">Windows Toolbox</span><span id="ver"></span>
   </div>
-</header>
-
-<nav>
-  <div class="nav-in">
-    <div class="tabs" id="tabs"></div>
-    <label class="search">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
-      <input id="q" type="search" data-i18n-ph="searchPh" autocomplete="off">
-    </label>
+  <label class="search">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+    <input id="q" type="search" data-i18n-ph="searchPh" autocomplete="off" spellcheck="false">
+  </label>
+  <div class="tools">
     <div class="lang" id="lang" role="group" aria-label="Language">
       <button type="button" data-l="en">EN</button><button type="button" data-l="uk">UA</button><button type="button" data-l="ru">RU</button>
     </div>
-    <button class="edit sel" id="selBtn" data-i18n-title="selectTitle"></button>
-    <button class="edit" id="editBtn" data-i18n-title="editTitle"></button>
-    <button class="theme" id="theme" data-i18n-title="themeTitle">☾</button>
+    <button class="tool long" id="selBtn" type="button" aria-pressed="false" data-i18n-title="selectTitle"></button>
+    <button class="tool" id="theme" type="button" data-i18n-title="themeTitle" aria-label="Theme">☾</button>
   </div>
-  <div class="editbar">
-    <span id="editInfo"></span>
-    <div class="btns">
-      <button class="btn" id="expBtn" data-i18n="exp" data-i18n-title="expTitle"></button>
-      <button class="btn" id="impBtn" data-i18n="imp" data-i18n-title="impTitle"></button>
-      <button class="btn danger" id="resetBtn" data-i18n="reset" data-i18n-title="resetTitle"></button>
-    </div>
-    <input type="file" id="impFile" accept=".json,application/json" hidden>
-  </div>
-</nav>
+</header>
 
-<main id="main"></main>
-<div class="empty" id="empty" data-i18n="empty"></div>
+<div class="layout">
+  <nav class="rail" id="rail" aria-label="Sections"><div class="tabs" id="tabs"></div></nav>
+  <main id="main"></main>
+</div>
+<div class="empty" id="empty" style="display:none" data-i18n="empty"></div>
 
-<div class="selbar" id="selbar">
+<div class="selbar" id="selbar" role="region" aria-label="Set">
   <b id="selCount"></b>
-  <button class="btn dl" id="selInstall" type="button"></button>
-  <button class="btn" id="selScript" type="button" data-i18n="script"></button>
-  <button class="btn" id="selSave" type="button" data-i18n="saveSet"></button>
-  <button class="btn" id="selShare" type="button" data-i18n="share"></button>
-  <button class="btn" id="selSets" type="button" data-i18n="sets"></button>
-  <button class="btn danger" id="selClear" type="button" data-i18n="clear"></button>
+  <code class="selcmd idle" id="selCmd"></code>
+  <div class="selbtns">
+    <button class="btn primary" id="selInstall" type="button"></button>
+    <button class="btn" id="selScript" type="button" data-i18n="script"></button>
+    <button class="btn" id="selSave" type="button" data-i18n="saveSet"></button>
+    <button class="btn" id="selShare" type="button" data-i18n="share"></button>
+    <button class="btn" id="selSets" type="button" data-i18n="sets"></button>
+    <button class="btn danger" id="selClear" type="button" data-i18n="clear"></button>
+  </div>
 </div>
 
-<div class="upd" id="upd" hidden>
-  <span id="updMsg"></span>
-  <a class="btn dl" id="updLink" href="#" target="_blank" rel="noopener" hidden><span class="ic">⬇</span><span data-i18n="download"></span></a>
-  <button class="btn dl" id="updRestart" type="button" hidden data-i18n="restart"></button>
-  <button class="upd-x" id="updX" type="button" data-i18n-title="hide">✕</button>
-</div>
+<dialog id="setsDlg"><form method="dialog" class="dlg">
+  <h3 data-i18n="setsTitle"></h3>
+  <div id="setList"></div>
+  <p style="margin-top:14px" data-i18n="importSet"></p>
+  <input type="text" id="setImport" autocomplete="off" spellcheck="false">
+  <p class="err-t" id="setErr"></p>
+  <div class="row"><button class="btn" id="setImportBtn" type="button" data-i18n="openSet"></button><button class="btn primary" value="close" data-i18n="closeDlg"></button></div>
+</form></dialog>
 
-<footer><span data-i18n="footer"></span><br><span id="ver"></span></footer>
-<button class="top" id="top" data-i18n-title="toTop">↑</button>
+<dialog id="scriptDlg"><form method="dialog" class="dlg">
+  <h3 data-i18n="scriptTitle"></h3>
+  <p data-i18n="scriptHint"></p>
+  <textarea id="scriptText" readonly spellcheck="false"></textarea>
+  <div class="row"><button class="btn" id="scriptCopy" type="button" data-i18n="copy"></button><button class="btn" id="scriptSave" type="button" data-i18n="saveScript"></button><button class="btn primary" value="close" data-i18n="closeDlg"></button></div>
+</form></dialog>
+
+<footer><span data-i18n="footer"></span></footer>
 <div class="toast" id="toast" role="status"></div>
-
-<dialog id="addDlg">
-  <form id="addForm" novalidate>
-    <h2 data-i18n="dlgTitle"></h2>
-    <label><span data-i18n="dlgSrc"></span>
-      <input name="src" placeholder="https://github.com/microsoft/PowerToys" autocomplete="off" required>
-    </label>
-    <div class="hint" id="ghHint"></div>
-    <label><span data-i18n="dlgName"></span><input name="n" autocomplete="off" required></label>
-    <label><span data-i18n="dlgDesc"></span><input name="d" maxlength="90" autocomplete="off" data-i18n-ph="dlgDescPh"></label>
-    <div class="row">
-      <label><span data-i18n="dlgSec"></span><select name="sec"></select></label>
-      <label><span data-i18n="dlgGroup"></span><select name="group"></select></label>
-    </div>
-    <label id="newGroupL" hidden><span data-i18n="dlgNewGroup"></span><input name="newGroup" autocomplete="off"></label>
-    <div class="err" id="addErr"></div>
-    <div class="dlg-acts">
-      <button type="button" class="btn" id="addCancel" data-i18n="cancel"></button>
-      <button type="submit" class="btn dl" data-i18n="add"></button>
-    </div>
-  </form>
-</dialog>
-
-<dialog id="setsDlg">
-  <form method="dialog">
-    <h2 data-i18n="setsTitle"></h2>
-    <div class="setlist" id="setList"></div>
-    <label><span data-i18n="importSet"></span>
-      <span class="inline"><input id="setImport" autocomplete="off" placeholder="https://…#set=…"><button type="button" class="btn" id="setImportBtn" data-i18n="openSet"></button></span>
-    </label>
-    <div class="err" id="setErr"></div>
-    <div class="dlg-acts"><button class="btn" data-i18n="closeDlg"></button></div>
-  </form>
-</dialog>
-
-<dialog id="scriptDlg">
-  <form method="dialog">
-    <h2 data-i18n="scriptTitle"></h2>
-    <p class="muted" data-i18n="scriptHint"></p>
-    <textarea id="scriptText" readonly spellcheck="false"></textarea>
-    <div class="dlg-acts">
-      <button type="button" class="btn" id="scriptCopy" data-i18n="copy"></button>
-      <button type="button" class="btn dl" id="scriptSave" data-i18n="saveScript"></button>
-      <button class="btn" data-i18n="closeDlg"></button>
-    </div>
-  </form>
-</dialog>
 
 <!-- filled by tools/build.mjs from catalog.json / downloads.json; empty in the source file -->
 <script id="catalog-data" type="application/json"></script>
@@ -404,7 +281,6 @@ dialog .inline .btn{flex:0 0 auto}
 // ===== settings ==========================================================================
 const REPO = "barnibeats/windows-toolbox";   // repo with app releases
 const SITE = "https://barnibeats.github.io/windows-toolbox/";   // web version, used in share links
-const EDITING_ENABLED = false;                // true → the edit button and personal edits are back
 const DEFAULT_LANG = "en";                    // used until the visitor picks a language
 // ========================================================================================
 const GH = "https://github.com/";
@@ -414,36 +290,23 @@ const params = new URLSearchParams(location.search);
 // ----- interface strings -----------------------------------------------------------------
 const UI = {
  en: {
-  h1: "The best for", sub: "Open-source apps from GitHub, hidden features and handy commands: personalization, gaming, administration and fine-tuning your system.",
-  statApps: "apps", statKeys: "hotkeys", statSecs: "sections", searchPh: "Search apps…",
-  editTitle: "Remove or add cards", edit: "✎ Edit", done: "✓ Done", themeTitle: "Toggle theme",
-  exp: "⇩ Export", expTitle: "Save your changes to a file", imp: "⇧ Import", impTitle: "Load changes from a file",
-  reset: "↺ Reset", resetTitle: "Restore the original list", empty: "Nothing found 🤷",
-  download: "Download", hide: "Hide", toTop: "Back to top",
-  footer: "Always check the date of the latest release in the repository before installing.",
+  searchPh: "Search {0} apps…",
+  themeTitle: "Toggle theme",
+  empty: "Nothing found. Try a shorter word or the English name.",
+  download: "Download", hide: "Hide", footer: "Always check the date of the latest release in the repository before installing.",
   appVersion: "App v{0}",
-  dlgTitle: "New app", dlgSrc: "GitHub link or “owner/repository”", dlgName: "Name", dlgDesc: "Description",
-  dlgDescPh: "In short: what the app does", dlgSec: "Section", dlgGroup: "Group", dlgNewGroup: "New group name",
-  newGroupOpt: "＋ New group…", cancel: "Cancel", add: "Add", closeDlg: "Close",
+  closeDlg: "Close",
   github: "GitHub", site: "Website", dl: "Download", dlTitle: "Download the latest Windows version",
   dlBusy: "Looking…", dlOk: "Downloading", dlOpen: "Opened", mb: "MB",
   nSite: "No GitHub releases — opening the download site", nOrg: "Pick a repository on the organization page",
   nLimit: "GitHub API limit reached — opening releases", nNoWin: "No ready-made Windows file — opening releases",
   nOffline: "Can't reach the GitHub API — opening releases", nNoNet: "No internet connection",
   hotkeys: "Hotkeys", hidden: "Hidden features", cmds: "Handy commands (terminal as administrator)",
-  copy: "Copy", copied: "Copied ✓", mine: "mine", removeCard: "Remove card",
-  editHint: "Click ✕ on a card to remove it, or “+” to add an app", editStats: "Your changes: {0} removed, {1} added",
-  addCard: "Add app", removed: "Removed: {0}", added: "Added: {0}", undo: "Undo",
-  exported: "toolbox-edits.json saved to Downloads", importErr: "Couldn't read the file — is it an export from this app?",
-  resetNone: "No changes — the list is already original", resetConfirm: "Restore the original list? Removed cards come back, cards you added are deleted.",
-  ghLooking: "Looking it up on GitHub…", gh404: "Repository not found — check the link", ghFail: "GitHub didn't respond, fill in the fields manually",
-  ghOffline: "No connection to GitHub, fill in the fields manually", ghPlain: "Plain link: the Download button will open this site", archived: "archived",
-  errSrc: "Enter a GitHub link, “owner/repository” or a website address", errName: "Enter a name", errGroup: "Enter a name for the new group",
-  errDup: "“{0}” is already on the page", addedManually: "Added manually",
+  copy: "Copy", copied: "Copied ✓", archived: "archived",
   starsTitle: "GitHub stars", relTitle: "Latest release",
   install: "Install", installTitle: "Install silently with winget", installed: "Installed", upgrade: "Update",
   queued: "Queued", installing: "Installing…", installFail: "Failed ({0})", installDone: "{0} installed", installErr: "{0}: installation failed",
-  select: "☑ Select", selectDone: "✓ Done", selectTitle: "Pick several apps to install together or share as a set",
+  select: "Select", selectDone: "Done", selectTitle: "Pick several apps to install together or share as a set",
   selCount: "Selected: {0}", installAll: "Install ({0})", script: "Script", saveSet: "Save set", share: "Share", sets: "Sets", clear: "Clear",
   setName: "Name of the set:", setSaved: "Set “{0}” saved", setLoaded: "Set loaded: {0} apps", shareCopied: "Link copied — whoever opens it gets this set",
   setsTitle: "Saved sets", setsEmpty: "No saved sets yet. Select apps and press “Save set”.", load: "Load", del: "Delete", appsN: "{0} apps",
@@ -451,40 +314,28 @@ const UI = {
   scriptTitle: "Install script (PowerShell + winget)", scriptHint: "Run it in PowerShell. Apps that aren't in winget are listed at the end — download those manually.",
   saveScript: "Save .ps1", scriptCopied: "Script copied", notInWinget: "Not in winget, download manually:",
   offline: "No internet connection — showing the saved version. Downloads and installs are unavailable.",
-  updAvail: "✨ Version {0} of the app is available", updDownloading: "⏳ Downloading update {0}…", updReady: "✨ Update {0} is ready — it will be installed when you close the app",
-  restart: "Restart now", confirmInstall: "Install with winget?"
+  updAvail: "Version {0} of the app is available", updDownloading: "Downloading update {0}…", updReady: "Update {0} is ready. It will be installed when you close the app",
+  restart: "Restart now", confirmInstall: "Install with winget?",
+  previewEmpty: "Pick apps to see the install command"
  },
  uk: {
-  h1: "Найкраще для", sub: "Програми з відкритим кодом з GitHub, приховані функції та корисні команди: персоналізація, ігри, адміністрування й тонке налаштування системи.",
-  statApps: "програм", statKeys: "гарячих клавіш", statSecs: "розділів", searchPh: "Пошук програми…",
-  editTitle: "Прибрати або додати картки", edit: "✎ Редагувати", done: "✓ Готово", themeTitle: "Змінити тему",
-  exp: "⇩ Експорт", expTitle: "Зберегти ваші зміни у файл", imp: "⇧ Імпорт", impTitle: "Завантажити зміни з файлу",
-  reset: "↺ Скинути", resetTitle: "Повернути початковий список", empty: "Нічого не знайдено 🤷",
-  download: "Завантажити", hide: "Сховати", toTop: "Нагору",
-  footer: "Перед встановленням перевірте дату останнього релізу в репозиторії.",
+  searchPh: "Пошук серед {0} програм…",
+  themeTitle: "Змінити тему",
+  empty: "Нічого не знайдено. Спробуйте коротше слово або англійську назву.",
+  download: "Завантажити", hide: "Сховати", footer: "Перед встановленням перевірте дату останнього релізу в репозиторії.",
   appVersion: "Застосунок v{0}",
-  dlgTitle: "Нова програма", dlgSrc: "Посилання на GitHub або «власник/репозиторій»", dlgName: "Назва", dlgDesc: "Опис",
-  dlgDescPh: "Коротко: що робить програма", dlgSec: "Розділ", dlgGroup: "Група", dlgNewGroup: "Назва нової групи",
-  newGroupOpt: "＋ Нова група…", cancel: "Скасувати", add: "Додати", closeDlg: "Закрити",
+  closeDlg: "Закрити",
   github: "GitHub", site: "Сайт", dl: "Завантажити", dlTitle: "Завантажити останню версію для Windows",
   dlBusy: "Шукаю файл…", dlOk: "Завантажується", dlOpen: "Відкрито", mb: "МБ",
   nSite: "Немає релізів на GitHub — відкриваю сайт завантаження", nOrg: "Оберіть репозиторій на сторінці організації",
   nLimit: "Ліміт GitHub API вичерпано — відкриваю релізи", nNoWin: "Готового файлу для Windows немає — відкриваю релізи",
   nOffline: "Немає зв'язку з GitHub API — відкриваю релізи", nNoNet: "Немає підключення до інтернету",
   hotkeys: "Гарячі клавіші", hidden: "Приховані функції", cmds: "Корисні команди (термінал від імені адміністратора)",
-  copy: "Копіювати", copied: "Скопійовано ✓", mine: "моє", removeCard: "Прибрати картку",
-  editHint: "Натисніть ✕ на картці, щоб прибрати її, або «+», щоб додати програму", editStats: "Ваші зміни: прибрано {0}, додано {1}",
-  addCard: "Додати програму", removed: "Прибрано: {0}", added: "Додано: {0}", undo: "Скасувати",
-  exported: "Файл toolbox-edits.json збережено в «Завантаження»", importErr: "Не вдалося прочитати файл — це точно експорт із цього застосунку?",
-  resetNone: "Змін немає — список уже початковий", resetConfirm: "Повернути початковий список? Прибрані картки повернуться, додані вами — видаляться.",
-  ghLooking: "Шукаю на GitHub…", gh404: "Репозиторій не знайдено — перевірте посилання", ghFail: "GitHub не відповів, заповніть поля вручну",
-  ghOffline: "Немає зв'язку з GitHub, заповніть поля вручну", ghPlain: "Звичайне посилання: кнопка «Завантажити» відкриє цей сайт", archived: "архівовано",
-  errSrc: "Вкажіть посилання на GitHub, «власник/репозиторій» або адресу сайту", errName: "Введіть назву", errGroup: "Введіть назву нової групи",
-  errDup: "«{0}» уже є на сторінці", addedManually: "Додано вручну",
+  copy: "Копіювати", copied: "Скопійовано ✓", archived: "архівовано",
   starsTitle: "Зірки на GitHub", relTitle: "Останній реліз",
   install: "Встановити", installTitle: "Тихо встановити через winget", installed: "Встановлено", upgrade: "Оновити",
   queued: "У черзі", installing: "Встановлення…", installFail: "Помилка ({0})", installDone: "{0} встановлено", installErr: "{0}: не вдалося встановити",
-  select: "☑ Вибрати", selectDone: "✓ Готово", selectTitle: "Виберіть кілька програм, щоб встановити їх разом або поділитися набором",
+  select: "Вибрати", selectDone: "Готово", selectTitle: "Виберіть кілька програм, щоб встановити їх разом або поділитися набором",
   selCount: "Вибрано: {0}", installAll: "Встановити ({0})", script: "Скрипт", saveSet: "Зберегти набір", share: "Поділитися", sets: "Набори", clear: "Очистити",
   setName: "Назва набору:", setSaved: "Набір «{0}» збережено", setLoaded: "Набір завантажено: програм — {0}", shareCopied: "Посилання скопійовано — хто його відкриє, отримає цей набір",
   setsTitle: "Збережені набори", setsEmpty: "Збережених наборів поки немає. Виберіть програми й натисніть «Зберегти набір».", load: "Відкрити", del: "Видалити", appsN: "програм: {0}",
@@ -492,40 +343,28 @@ const UI = {
   scriptTitle: "Скрипт встановлення (PowerShell + winget)", scriptHint: "Запустіть його в PowerShell. Програми, яких немає у winget, перелічені в кінці — їх завантажте вручну.",
   saveScript: "Зберегти .ps1", scriptCopied: "Скрипт скопійовано", notInWinget: "Немає у winget, завантажте вручну:",
   offline: "Немає підключення до інтернету — показано збережену версію. Завантаження та встановлення недоступні.",
-  updAvail: "✨ Доступна версія застосунку {0}", updDownloading: "⏳ Завантажую оновлення {0}…", updReady: "✨ Оновлення {0} готове — воно встановиться, коли ви закриєте застосунок",
-  restart: "Перезапустити зараз", confirmInstall: "Встановити через winget?"
+  updAvail: "Доступна версія застосунку {0}", updDownloading: "Завантажую оновлення {0}…", updReady: "Оновлення {0} готове. Воно встановиться, коли ви закриєте застосунок",
+  restart: "Перезапустити зараз", confirmInstall: "Встановити через winget?",
+  previewEmpty: "Виберіть програми, щоб побачити команду встановлення"
  },
  ru: {
-  h1: "Лучшее для", sub: "Открытые программы с GitHub, скрытые функции и полезные команды: персонализация, игры, администрирование и тонкая настройка системы.",
-  statApps: "программ", statKeys: "горячих клавиш", statSecs: "разделов", searchPh: "Поиск программы…",
-  editTitle: "Убрать или добавить карточки", edit: "✎ Редактировать", done: "✓ Готово", themeTitle: "Сменить тему",
-  exp: "⇩ Экспорт", expTitle: "Сохранить ваши изменения в файл", imp: "⇧ Импорт", impTitle: "Загрузить изменения из файла",
-  reset: "↺ Сбросить", resetTitle: "Вернуть исходный список", empty: "Ничего не найдено 🤷",
-  download: "Скачать", hide: "Скрыть", toTop: "Наверх",
-  footer: "Перед установкой проверьте дату последнего релиза в репозитории.",
+  searchPh: "Поиск среди {0} программ…",
+  themeTitle: "Сменить тему",
+  empty: "Ничего не найдено. Попробуйте короче слово или английское название.",
+  download: "Скачать", hide: "Скрыть", footer: "Перед установкой проверьте дату последнего релиза в репозитории.",
   appVersion: "Приложение v{0}",
-  dlgTitle: "Новая программа", dlgSrc: "Ссылка на GitHub или «владелец/репозиторий»", dlgName: "Название", dlgDesc: "Описание",
-  dlgDescPh: "Коротко: что делает программа", dlgSec: "Раздел", dlgGroup: "Группа", dlgNewGroup: "Название новой группы",
-  newGroupOpt: "＋ Новая группа…", cancel: "Отмена", add: "Добавить", closeDlg: "Закрыть",
+  closeDlg: "Закрыть",
   github: "GitHub", site: "Сайт", dl: "Скачать", dlTitle: "Скачать последнюю версию для Windows",
   dlBusy: "Ищу файл…", dlOk: "Скачивается", dlOpen: "Открыто", mb: "МБ",
   nSite: "Нет релизов на GitHub — открываю сайт загрузки", nOrg: "Выберите репозиторий на странице организации",
   nLimit: "Лимит GitHub API исчерпан — открываю релизы", nNoWin: "Готового файла для Windows нет — открываю релизы",
   nOffline: "Нет связи с GitHub API — открываю релизы", nNoNet: "Нет подключения к интернету",
   hotkeys: "Горячие клавиши", hidden: "Скрытые функции", cmds: "Полезные команды (терминал от администратора)",
-  copy: "Копировать", copied: "Скопировано ✓", mine: "моё", removeCard: "Убрать карточку",
-  editHint: "Нажмите ✕ на карточке, чтобы убрать её, или «+», чтобы добавить программу", editStats: "Ваши изменения: убрано {0}, добавлено {1}",
-  addCard: "Добавить программу", removed: "Убрано: {0}", added: "Добавлено: {0}", undo: "Отменить",
-  exported: "Файл toolbox-edits.json сохранён в «Загрузки»", importErr: "Не получилось прочитать файл — это точно экспорт из этого приложения?",
-  resetNone: "Изменений нет — список уже исходный", resetConfirm: "Вернуть исходный список? Убранные карточки вернутся, добавленные вами — удалятся.",
-  ghLooking: "Ищу на GitHub…", gh404: "Репозиторий не найден — проверьте ссылку", ghFail: "GitHub не ответил, заполните поля вручную",
-  ghOffline: "Нет связи с GitHub, заполните поля вручную", ghPlain: "Обычная ссылка: кнопка «Скачать» откроет этот сайт", archived: "архивирован",
-  errSrc: "Укажите ссылку на GitHub, «владелец/репозиторий» или адрес сайта", errName: "Введите название", errGroup: "Введите название новой группы",
-  errDup: "«{0}» уже есть на странице", addedManually: "Добавлено вручную",
+  copy: "Копировать", copied: "Скопировано ✓", archived: "архивирован",
   starsTitle: "Звёзды на GitHub", relTitle: "Последний релиз",
   install: "Установить", installTitle: "Тихо установить через winget", installed: "Установлено", upgrade: "Обновить",
   queued: "В очереди", installing: "Установка…", installFail: "Ошибка ({0})", installDone: "{0} установлено", installErr: "{0}: не удалось установить",
-  select: "☑ Выбрать", selectDone: "✓ Готово", selectTitle: "Выберите несколько программ, чтобы установить их разом или поделиться набором",
+  select: "Выбрать", selectDone: "Готово", selectTitle: "Выберите несколько программ, чтобы установить их разом или поделиться набором",
   selCount: "Выбрано: {0}", installAll: "Установить ({0})", script: "Скрипт", saveSet: "Сохранить набор", share: "Поделиться", sets: "Наборы", clear: "Очистить",
   setName: "Название набора:", setSaved: "Набор «{0}» сохранён", setLoaded: "Набор загружен: программ — {0}", shareCopied: "Ссылка скопирована — кто её откроет, получит этот набор",
   setsTitle: "Сохранённые наборы", setsEmpty: "Сохранённых наборов пока нет. Выберите программы и нажмите «Сохранить набор».", load: "Открыть", del: "Удалить", appsN: "программ: {0}",
@@ -533,8 +372,9 @@ const UI = {
   scriptTitle: "Скрипт установки (PowerShell + winget)", scriptHint: "Запустите его в PowerShell. Программы, которых нет в winget, перечислены в конце — их скачайте вручную.",
   saveScript: "Сохранить .ps1", scriptCopied: "Скрипт скопирован", notInWinget: "Нет в winget, скачайте вручную:",
   offline: "Нет подключения к интернету — показана сохранённая версия. Скачивание и установка недоступны.",
-  updAvail: "✨ Доступна версия приложения {0}", updDownloading: "⏳ Скачиваю обновление {0}…", updReady: "✨ Обновление {0} готово — оно установится, когда вы закроете приложение",
-  restart: "Перезапустить сейчас", confirmInstall: "Установить через winget?"
+  updAvail: "Доступна версия приложения {0}", updDownloading: "Скачиваю обновление {0}…", updReady: "Обновление {0} готово. Оно установится, когда вы закроете приложение",
+  restart: "Перезапустить сейчас", confirmInstall: "Установить через winget?",
+  previewEmpty: "Выберите программы, чтобы увидеть команду установки"
  }
 };
 
@@ -576,91 +416,73 @@ const canInstall = it => HOST && W.available && it && it.w;
 
 const main = document.getElementById("main");
 const tabs = document.getElementById("tabs");
+const topEl = document.getElementById("top"), rail = document.getElementById("rail");
+const phone = matchMedia("(max-width: 900px)");
 let appCount = 0;
 
-// user edits: default cards removed (by repo key) + cards added by the user.
-// With EDITING_ENABLED off, stored edits are ignored (not deleted), so everyone sees the published list.
-const STORE = "toolbox.edits.v1";
-let edits = {removed: [], added: []};
-if (EDITING_ENABLED) try {
-  const s = JSON.parse(localStorage.getItem(STORE));
-  if (s && Array.isArray(s.removed) && Array.isArray(s.added)) edits = s;
-} catch {}
-
-// group key = its Russian name (stable across languages and compatible with saved edits)
+// group key = its Russian name (stable across languages)
 const gKey = g => typeof g.name === "string" ? g.name : g.name.ru;
 const selected = new Set();   // repo keys picked in select mode
 
 function installBtn(it) {
   if (!canInstall(it)) return "";
   const id = it.w.toLowerCase(), st = W.state.get(id);
-  let cls = "", ic = "⤓", lb = T("install");
-  if (st === "queued") { cls = "busy"; ic = "◌"; lb = T("queued"); }
-  else if (st === "running") { cls = "busy"; ic = "◌"; lb = T("installing"); }
+  let cls = "", ic = "+", lb = T("install");
+  if (st === "queued") { cls = "busy"; ic = "…"; lb = T("queued"); }
+  else if (st === "running") { cls = "busy"; ic = "…"; lb = T("installing"); }
   else if (st && st.startsWith("error")) { cls = "err"; ic = "!"; lb = T("installFail", st.slice(6)); }
   else if (W.upgrades.has(id)) { cls = "upg"; ic = "↻"; lb = T("upgrade"); }
   else if (W.installed.has(id)) { cls = "done"; ic = "✓"; lb = T("installed"); }
-  return `<button class="btn inst ${cls}" type="button" data-w="${esc(it.w)}" title="${esc(T("installTitle"))} (${esc(it.w)})"><span class="ic">${ic}</span><span class="lb">${lb}</span></button>`;
+  return `<button class="btn inst ${cls}" type="button" data-w="${esc(it.w)}" title="${esc(T("installTitle"))} (${esc(it.w)})"><span class="ic" aria-hidden="true">${ic}</span><span class="lb">${lb}</span></button>`;
 }
 function metaHTML(p, it) {
   const m = DL[p] || {};
-  let h = `<span class="host">${esc(host(p))}</span>`;
+  let h = "";
   if (m.st != null) h += `<span class="chip" title="${esc(T("starsTitle"))}">★ ${stars(m.st)}</span>`;
-  if (m.t) h += `<span class="chip" title="${esc(T("relTitle"))}">${esc(m.t.length > 16 ? m.t.slice(0, 15) + "…" : m.t)}${m.at ? " · " + esc(ago(m.at)) : ""}</span>`;
+  if (m.t) h += `<span class="chip" title="${esc(T("relTitle"))}">${esc(m.t.length > 16 ? m.t.slice(0, 15) + "…" : m.t)}${m.at ? ", " + esc(ago(m.at)) : ""}</span>`;
   if (m.ar) h += `<span class="chip warn">${T("archived")}</span>`;
   if (it && it.w && HOST && W.installed.has(it.w.toLowerCase())) h += `<span class="chip inst">✓ ${T("installed")}</span>`;
   return `<div class="meta">${h}</div>`;
 }
-const cardHTML = (n, p, d, key, mine) => {
-  const it = mine ? null : APPS.get(p);
-  const inst = installBtn(it);
-  return `<div class="card${mine ? " mine" : ""}${selected.has(key) ? " picked" : ""}" data-key="${esc(key)}" data-q="${esc((n+" "+d+" "+p).toLowerCase())}">
-  <button class="rm" type="button" title="${esc(T("removeCard"))}" aria-label="${esc(T("removeCard"))}: ${esc(n)}">✕</button>
-  <label class="pick" title="${esc(n)}"><input type="checkbox"${selected.has(key) ? " checked" : ""} aria-label="${esc(n)}"><span></span></label>
-  <div class="card-t"><a href="${url(p)}" target="_blank" rel="noopener">${esc(n)}${mine ? `<span class="mine-tag">${T("mine")}</span>` : ""}</a><span class="arr">↗</span></div><p>${esc(d)}</p>${metaHTML(p, it)}
-  <div class="acts"><a class="btn gh${inst ? " compact" : ""}" href="${url(p)}" target="_blank" rel="noopener" title="${p.startsWith("http") ? T("site") : T("github")}">${inst ? "↗" : (p.startsWith("http") ? T("site") : T("github"))}</a><button class="btn dl" data-src="${esc(p)}" title="${esc(T("dlTitle"))}"><span class="ic">⬇</span><span class="lb">${T("dl")}</span></button>${inst}</div>
-  <div class="st"></div></div>`;
+const cardHTML = it => {
+  const p = it.r, n = it.n, d = descOf(it), sel = selected.has(p), inst = installBtn(it);
+  return `<div class="card${sel ? " picked" : ""}" data-key="${esc(p)}" data-q="${esc((n + " " + d + " " + p).toLowerCase())}">
+  <label class="pick" title="${esc(n)}"><input type="checkbox"${sel ? " checked" : ""} aria-label="${esc(n)}"></label>
+  <div class="info">
+    <div class="name"><a href="${url(p)}" target="_blank" rel="noopener">${esc(n)}</a><span class="repo">${esc(host(p))}</span></div>
+    <p>${esc(d)}</p>${metaHTML(p, it)}<div class="st"></div>
+  </div>
+  <div class="acts"><button class="btn dl" type="button" data-src="${esc(p)}" title="${esc(T("dlTitle"))}"><span class="ic" aria-hidden="true">↓</span><span class="lb">${T("dl")}</span></button><a class="btn icon gh" href="${url(p)}" target="_blank" rel="noopener" title="${p.startsWith("http") ? T("site") : T("github")}" aria-label="${p.startsWith("http") ? T("site") : T("github")}: ${esc(n)}">↗</a>${inst}</div>
+</div>`;
 };
-const groupHTML = (secId, key, label, inner) => `<div class="group" data-sec="${secId}" data-group="${esc(key)}"><h3>${esc(label)}</h3><div class="cards">${inner}<button class="add-card" type="button"><b>+</b>${T("addCard")}</button></div></div>`;
-const addedCards = (secId, key) => edits.added.filter(a => a.sec === secId && a.group === key)
-  .map(a => { appCount++; return cardHTML(a.n, a.p, a.d, a.id, true); }).join("");
 
-// reveal on scroll (staggered)
-const io = new IntersectionObserver(es => es.forEach(e => {
-  if (e.isIntersecting) { const el = e.target; const i = [...el.parentElement.children].indexOf(el);
-    el.style.transitionDelay = (Math.min(i,12)*45)+"ms"; el.classList.add("vis"); io.unobserve(el);
-    setTimeout(()=>el.style.transitionDelay="", 1200); }
-}), {threshold:.08});
-
-let secs = [];
+let secs = [], lockUntil = 0;
+function markTab(id) {
+  document.querySelectorAll(".tab").forEach(t => {
+    const on = t.dataset.id === id; t.classList.toggle("on", on);
+    if (on && phone.matches) rail.scrollLeft = t.offsetLeft - rail.clientWidth / 2 + t.offsetWidth / 2;
+  });
+}
 function render() {
-  const removedSet = new Set(edits.removed);
   appCount = 0; main.innerHTML = ""; tabs.innerHTML = "";
   DATA.forEach(sec => {
     const s = document.createElement("section");
     s.id = sec.id;
-    let html = `<div class="sec-h"><div class="sec-ic">${sec.icon}</div><h2>${esc(L(sec.title))}</h2></div><p class="sec-d">${esc(L(sec.desc))}</p>`;
+    const count = (sec.groups || []).reduce((n, g) => n + g.items.length, 0);
+    let html = `<div class="sec-h"><span class="sec-ic" aria-hidden="true">${sec.icon}</span><div><h2>${esc(L(sec.title))}</h2><p>${esc(L(sec.desc))}</p></div></div>`;
     if (sec.groups) {
       sec.groups.forEach(g => {
-        let inner = "";
-        g.items.forEach(it => {
-          if (removedSet.has(it.r)) return;
-          appCount++;
-          inner += cardHTML(it.n, it.r, descOf(it), it.r, false);
-        });
-        html += groupHTML(sec.id, gKey(g), L(g.name), inner + addedCards(sec.id, gKey(g)));
+        const rows = g.items.map(it => { appCount++; return cardHTML(it); }).join("");
+        html += `<div class="group" data-group="${esc(gKey(g))}"><h3><span class="plate">${esc(L(g.name))}</span></h3>${g.note ? `<p class="gnote">${esc(L(g.note))}</p>` : ""}<div class="rows">${rows}</div></div>`;
       });
-      // groups the user created in this section
-      [...new Set(edits.added.filter(a => a.sec === sec.id && !sec.groups.some(g => gKey(g) === a.group)).map(a => a.group))]
-        .forEach(gn => { html += groupHTML(sec.id, gn, gn, addedCards(sec.id, gn)); });
-      if (sec.note) html += `<div class="note">⚠️ ${esc(L(sec.note))}</div>`;
+      if (sec.note) html += `<p class="note">${esc(L(sec.note))}</p>`;
     } else if (sec.special === "tricks") {
-      html += `<h3>${T("hotkeys")}</h3><div class="keys">` +
-        KEYS.map(k => `<div class="key"><div class="combo">${k.keys.map(x=>`<kbd>${esc(x)}</kbd>`).join("")}</div><span>${esc(L(k.d))}</span></div>`).join("") +
-        `</div><h3>${T("hidden")}</h3><div class="tips">` +
+      html += `<h3 class="sub">${T("hotkeys")}</h3><div class="keys">` +
+        KEYS.map(k => `<div class="key"><span class="combo">${k.keys.map(x => `<kbd>${esc(x)}</kbd>`).join(`<span class="pl">+</span>`)}</span><span>${esc(L(k.d))}</span></div>`).join("") +
+        `</div><h3 class="sub">${T("hidden")}</h3><div class="tips">` +
         TIPS.map(t => `<div class="tip"><b>${esc(L(t.t))}</b><span>${L(t.d)}</span></div>`).join("") +
-        `</div><h3>${T("cmds")}</h3><div class="cmds">` +
-        CMDS.map(c => `<div class="cmd"><div class="cmd-h"><span style="display:flex;align-items:center"><span class="dots"><i></i><i></i><i></i></span>${esc(L(c.t))}</span><button class="copy" type="button">${T("copy")}</button></div><pre>${esc(L(c.c))}</pre></div>`).join("") +
+        `</div><h3 class="sub">${T("cmds")}</h3><div class="cmds">` +
+        CMDS.map(c => `<div class="cmd"><div class="cmd-h"><span>${esc(L(c.t))}</span><button class="copy" type="button">${T("copy")}</button></div><pre>${esc(L(c.c))}</pre></div>`).join("") +
         `</div>`;
     } else if (sec.special === "safety") {
       html += `<ol class="warn">` + SAFETY.map(t => `<li>${L(t)}</li>`).join("") + `</ol>`;
@@ -669,19 +491,19 @@ function render() {
     main.appendChild(s);
 
     const b = document.createElement("button");
-    b.className = "tab"; b.textContent = sec.icon + " " + L(sec.title); b.dataset.id = sec.id;
-    b.onclick = () => document.getElementById(sec.id).scrollIntoView();
+    b.className = "tab"; b.type = "button"; b.dataset.id = sec.id;
+    b.innerHTML = `<span class="ti" aria-hidden="true">${sec.icon}</span><span>${esc(L(sec.title))}</span><span class="tn">${count || ""}</span>`;
+    b.onclick = () => { lockUntil = performance.now() + 1200; markTab(sec.id); document.getElementById(sec.id).scrollIntoView(); };
     tabs.appendChild(b);
   });
-  document.querySelectorAll(".card,.key,.tip,.cmd,.warn li").forEach(el => io.observe(el));
-  secs = [...document.querySelectorAll("section")];
+  secs = [...document.querySelectorAll("main section")];
 }
 
 // static texts in the markup: data-i18n (text), data-i18n-ph (placeholder), data-i18n-title (tooltip)
 function applyStatic() {
   document.documentElement.lang = lang;
   document.querySelectorAll("[data-i18n]").forEach(el => el.textContent = T(el.dataset.i18n));
-  document.querySelectorAll("[data-i18n-ph]").forEach(el => el.placeholder = T(el.dataset.i18nPh));
+  document.querySelectorAll("[data-i18n-ph]").forEach(el => el.placeholder = T(el.dataset.i18nPh, appCount));
   document.querySelectorAll("[data-i18n-title]").forEach(el => el.title = T(el.dataset.i18nTitle));
   document.querySelectorAll("#lang button").forEach(b => b.classList.toggle("on", b.dataset.l === lang));
 }
@@ -689,28 +511,13 @@ function applyStatic() {
 render();
 applyStatic();
 
-// animated counters (first load only; later updates set the number directly)
-const counts = {apps: appCount, keys: KEYS.length, secs: DATA.length};
-document.querySelectorAll("[data-count]").forEach(el => {
-  const target = counts[el.dataset.count]; const t0 = performance.now();
-  (function step(t){ const k = Math.min(1,(t-t0)/1400); el.textContent = Math.round(target*(1-Math.pow(1-k,3))); if(k<1) requestAnimationFrame(step); })(t0);
-});
-
-// spotlight follows cursor on cards
-document.addEventListener("pointermove", e => {
-  const c = e.target.closest(".card"); if (!c) return;
-  const r = c.getBoundingClientRect();
-  c.style.setProperty("--mx", (e.clientX-r.left)+"px"); c.style.setProperty("--my", (e.clientY-r.top)+"px");
-});
-
 const toastEl = document.getElementById("toast");
 let toastTimer;
-function toast(msg, onUndo) {
-  toastEl.innerHTML = `<span>${esc(msg)}</span>` + (onUndo ? `<button type="button">${T("undo")}</button>` : "");
-  if (onUndo) toastEl.querySelector("button").onclick = () => { onUndo(); toastEl.classList.remove("show"); };
+function toast(msg) {
+  toastEl.innerHTML = `<span>${esc(msg)}</span>`;
   toastEl.classList.add("show");
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => toastEl.classList.remove("show"), 6000);
+  toastTimer = setTimeout(() => toastEl.classList.remove("show"), 5000);
 }
 
 // ---- offline notice ----------------------------------------------------------------------
@@ -783,7 +590,7 @@ document.addEventListener("click", async e => {
   const b = e.target.closest(".btn.dl[data-src]"); if (!b) return;
   const lb = b.querySelector(".lb"), ic = b.querySelector(".ic"), st = b.closest(".card").querySelector(".st");
   if (!navigator.onLine) { st.textContent = T("nNoNet"); st.classList.add("show"); return; }
-  b.classList.remove("ok", "alt"); b.classList.add("busy"); lb.textContent = T("dlBusy"); ic.textContent = "◌";
+  b.classList.remove("ok", "alt"); b.classList.add("busy"); lb.textContent = T("dlBusy"); ic.textContent = "…";
   let res = fromDL(b.dataset.src) || dlCache.get(b.dataset.src);
   if (!res) {
     try { res = await findDownload(b.dataset.src); dlCache.set(b.dataset.src, res); }
@@ -799,7 +606,7 @@ document.addEventListener("click", async e => {
     window.open(res.url, "_blank", "noopener");
     b.classList.add("alt"); lb.textContent = T("dlOpen"); ic.textContent = "↗";
   }
-  setTimeout(() => { b.classList.remove("ok", "alt"); lb.textContent = T("dl"); ic.textContent = "⬇"; }, 4000);
+  setTimeout(() => { b.classList.remove("ok", "alt"); lb.textContent = T("dl"); ic.textContent = "↓"; }, 4000);
 });
 
 // copy buttons
@@ -818,11 +625,11 @@ document.addEventListener("click", async e => {
 const q = document.getElementById("q"), empty = document.getElementById("empty");
 function applySearch() {
   const v = q.value.trim().toLowerCase(); let any = false;
-  document.querySelectorAll("section").forEach(s => {
+  document.querySelectorAll("main section").forEach(s => {
     let secHit = false;
     s.querySelectorAll(".group").forEach(g => {
       let hit = false;
-      g.querySelectorAll(".card").forEach(c => { const m = !v || c.dataset.q.includes(v); c.classList.toggle("hidden", !m); if (m) { hit = true; if (v) c.classList.add("vis"); } });
+      g.querySelectorAll(".card").forEach(c => { const m = !v || c.dataset.q.includes(v); c.classList.toggle("hidden", !m); if (m) hit = true; });
       g.classList.toggle("hidden", !hit && !!v); secHit ||= hit;
     });
     const plain = !s.querySelector(".group");
@@ -831,225 +638,53 @@ function applySearch() {
   empty.style.display = any ? "none" : "block";
 }
 q.addEventListener("input", applySearch);
+document.addEventListener("keydown", e => {
+  if (e.key === "/" && !e.ctrlKey && !e.metaKey && !/^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement.tagName)) { e.preventDefault(); q.focus(); q.select(); }
+  else if (e.key === "Escape" && document.activeElement === q) { q.value = ""; applySearch(); q.blur(); }
+});
 
-// active tab + progress + top button
-const topBtn = document.getElementById("top"), prog = document.getElementById("progress");
-function onScroll() {
-  const y = scrollY; prog.style.width = (y/(document.documentElement.scrollHeight-innerHeight)*100)+"%";
-  topBtn.classList.toggle("show", y > 600);
-  let cur = secs[0].id; secs.forEach(s => { if (!s.classList.contains("hidden") && s.offsetTop - 150 <= y) cur = s.id; });
-  document.querySelectorAll(".tab").forEach(t => t.classList.toggle("on", t.dataset.id === cur));
+// sticky offsets (header and, on phones, the section rail) + active section in the rail
+function measure() {
+  document.documentElement.style.setProperty("--hh", topEl.offsetHeight + "px");
+  document.documentElement.style.setProperty("--rh", phone.matches ? rail.offsetHeight + "px" : "0px");
 }
-addEventListener("scroll", onScroll, {passive:true});
-topBtn.onclick = () => scrollTo({top:0});
-onScroll();
+let lastCur = null;
+function onScroll() {
+  const y = scrollY + topEl.offsetHeight + (phone.matches ? rail.offsetHeight : 0) + 24;
+  let cur = secs.length ? secs[0].id : null;
+  secs.forEach(s => { if (!s.classList.contains("hidden") && s.offsetTop <= y) cur = s.id; });
+  if (cur === lastCur || performance.now() < lockUntil) return;
+  lastCur = cur;
+  markTab(cur);
+}
+addEventListener("scroll", onScroll, {passive: true});
+addEventListener("resize", () => { measure(); onScroll(); });
+addEventListener("load", measure);
+measure();
 
-// re-render everything keeping the scroll position (language switch, winget state change)
+// re-render everything keeping the scroll position (language switch)
 function rerender() {
   const y = scrollY;
-  render(); applyStatic(); applySearch(); updateEditInfo(); updateCount(); updateSel(); updateVersion(); renderUpdate();
-  document.querySelectorAll(".card,.key,.tip,.cmd,.warn li").forEach(el => el.classList.add("vis")); // no re-reveal
-  scrollTo(0, y); onScroll();
+  render(); applyStatic(); applySearch(); updateSel(); updateVersion(); renderUpdate(); measure();
+  scrollTo(0, y); lastCur = null; onScroll();
 }
-// cheaper refresh of install buttons + "installed" chips only
+// cheaper refresh of install buttons + "installed" chips only (winget state changed)
 function refreshInstallButtons() {
   document.querySelectorAll(".card[data-key]").forEach(c => {
     const it = APPS.get(c.dataset.key); if (!it || !it.w) return;
     const acts = c.querySelector(".acts"), old = acts.querySelector(".inst"), html = installBtn(it);
-    const g = acts.querySelector(".gh");
-    if (old && !html) { old.remove(); g.classList.remove("compact"); g.textContent = it.r.startsWith("http") ? T("site") : T("github"); }
-    else if (old) old.outerHTML = html; else if (html) { acts.insertAdjacentHTML("beforeend", html); g.classList.add("compact"); g.textContent = "↗"; }
+    if (old && !html) old.remove(); else if (old) old.outerHTML = html; else if (html) acts.insertAdjacentHTML("beforeend", html);
     c.querySelector(".meta").outerHTML = metaHTML(it.r, it);
   });
   updateSel();
 }
 
-// ---- edit mode: remove / add cards, persisted in localStorage --------------------------
-const editBtn = document.getElementById("editBtn"), editInfo = document.getElementById("editInfo");
-if (!EDITING_ENABLED) editBtn.remove();
-
-function saveEdits() {
-  try { localStorage.setItem(STORE, JSON.stringify(edits)); } catch {}
-  updateEditInfo();
-}
-function updateEditInfo() {
-  const r = edits.removed.length, a = edits.added.length;
-  editInfo.textContent = r || a ? T("editStats", r, a) : T("editHint");
-  editBtn.textContent = document.body.classList.contains("editing") ? T("done") : T("edit");
-}
-function updateCount() {
-  const el = document.querySelector('[data-count="apps"]');
-  if (el) el.textContent = document.querySelectorAll(".card:not(.out)").length;
-}
-
-editBtn.onclick = () => {
-  const on = document.body.classList.toggle("editing");
-  editBtn.classList.toggle("on", on);
-  updateEditInfo();
-};
-
-// remove a card (undo via toast)
-document.addEventListener("click", e => {
-  const rm = e.target.closest(".rm"); if (!rm) return;
-  const card = rm.closest(".card"), key = card.dataset.key;
-  const name = card.querySelector(".card-t a").firstChild.textContent;
-  const parent = card.parentElement, next = card.nextElementSibling;
-  let undo;
-  if (card.classList.contains("mine")) {
-    const i = edits.added.findIndex(a => a.id === key);
-    const item = edits.added.splice(i, 1)[0];
-    undo = () => edits.added.splice(i, 0, item);
-  } else {
-    edits.removed.push(key);
-    undo = () => { edits.removed = edits.removed.filter(k => k !== key); };
-  }
-  saveEdits();
-  card.classList.add("out");
-  const t = setTimeout(() => { card.remove(); updateCount(); }, 300);
-  toast(T("removed", name), () => {
-    clearTimeout(t); undo(); saveEdits();
-    parent.insertBefore(card, next && next.parentElement === parent ? next : parent.querySelector(".add-card"));
-    card.classList.remove("out"); card.classList.add("new", "vis");
-    setTimeout(() => card.classList.remove("new"), 600);
-    updateCount();
-  });
-});
-
-// add dialog
-const dlg = document.getElementById("addDlg"), form = document.getElementById("addForm");
-const fSrc = form.elements.src, fName = form.elements.n, fDesc = form.elements.d;
-const fSec = form.elements.sec, fGroup = form.elements.group, fNew = form.elements.newGroup;
-const newGroupL = document.getElementById("newGroupL"), ghHint = document.getElementById("ghHint"), addErr = document.getElementById("addErr");
-const editableSecs = DATA.filter(s => s.groups);
-function fillSecs() {
-  const v = fSec.value;
-  fSec.innerHTML = editableSecs.map(s => `<option value="${s.id}">${s.icon} ${esc(L(s.title))}</option>`).join("");
-  if (v) fSec.value = v;
-}
-function fillGroups(selectedKey) {
-  const groups = [...document.querySelectorAll(`#${fSec.value} .group`)];
-  fGroup.innerHTML = groups.map(g => `<option value="${esc(g.dataset.group)}">${esc(g.querySelector("h3").textContent)}</option>`).join("") +
-    `<option value="__new">${T("newGroupOpt")}</option>`;
-  if (selectedKey && groups.some(g => g.dataset.group === selectedKey)) fGroup.value = selectedKey;
-  newGroupL.hidden = fGroup.value !== "__new";
-}
-fSec.onchange = () => fillGroups();
-fGroup.onchange = () => { newGroupL.hidden = fGroup.value !== "__new"; if (!newGroupL.hidden) fNew.focus(); };
-
-// "https://github.com/owner/repo/..." | "owner/repo" | any http(s) link → canonical source
-function normSrc(v) {
-  v = v.trim().replace(/\.git$/i, "").replace(/\/+$/, "");
-  const m = v.match(/^(?:https?:\/\/)?(?:www\.)?github\.com\/([\w.-]+)(?:\/([\w.-]+))?/i);
-  if (m) return m[2] ? m[1] + "/" + m[2] : m[1];
-  if (/^[\w.-]+\/[\w.-]+$/.test(v)) return v;
-  if (/^https?:\/\//i.test(v)) { try { new URL(v); return v; } catch {} }
-  return null;
-}
-
-function openAdd(secId, groupKey) {
-  form.reset(); addErr.textContent = ""; ghHint.textContent = ""; ghHint.className = "hint";
-  fName.dataset.auto = fDesc.dataset.auto = "1";
-  fillSecs();
-  fSec.value = secId || editableSecs[0].id;
-  fillGroups(groupKey);
-  dlg.showModal();
-  fSrc.focus();
-}
-document.addEventListener("click", e => {
-  const b = e.target.closest(".add-card"); if (!b) return;
-  const g = b.closest(".group");
-  openAdd(g.dataset.sec, g.dataset.group);
-});
-document.getElementById("addCancel").onclick = () => dlg.close();
-document.querySelectorAll("dialog").forEach(d => d.addEventListener("click", e => { if (e.target === d) d.close(); })); // click on backdrop
-
-// fill name/description from GitHub while typing the repo
-fName.oninput = () => { fName.dataset.auto = fName.value ? "" : "1"; };
-fDesc.oninput = () => { fDesc.dataset.auto = fDesc.value ? "" : "1"; };
-let ghTimer, ghSeq = 0;
-fSrc.addEventListener("input", () => {
-  clearTimeout(ghTimer);
-  const p = normSrc(fSrc.value);
-  ghHint.className = "hint";
-  if (!p || p.startsWith("http") || !p.includes("/")) { ghHint.textContent = p && p.startsWith("http") ? T("ghPlain") : ""; return; }
-  ghHint.textContent = T("ghLooking");
-  const seq = ++ghSeq;
-  ghTimer = setTimeout(async () => {
-    try {
-      const r = await gh(p);
-      if (seq !== ghSeq) return;
-      if (!r.ok) { ghHint.textContent = r.status === 404 ? T("gh404") : T("ghFail"); return; }
-      const j = await r.json();
-      if (fName.dataset.auto) fName.value = j.name;
-      if (fDesc.dataset.auto && j.description) fDesc.value = j.description.length > 90 ? j.description.slice(0, 87) + "…" : j.description;
-      ghHint.textContent = `✓ ${j.full_name} · ★ ${stars(j.stargazers_count)}${j.archived ? " · " + T("archived") : ""}`;
-      ghHint.className = "hint ok";
-    } catch { if (seq === ghSeq) ghHint.textContent = T("ghOffline"); }
-  }, 450);
-});
-
-form.addEventListener("submit", e => {
-  e.preventDefault();
-  const p = normSrc(fSrc.value), n = fName.value.trim(), d = fDesc.value.trim() || T("addedManually");
-  const group = fGroup.value === "__new" ? fNew.value.trim() : fGroup.value;
-  if (!p) return addErr.textContent = T("errSrc");
-  if (!n) return addErr.textContent = T("errName");
-  if (!group) return addErr.textContent = T("errGroup");
-  const dup = [...document.querySelectorAll(".card:not(.out) .btn.dl")].find(b => b.dataset.src.toLowerCase() === p.toLowerCase());
-  if (dup) return addErr.textContent = T("errDup", dup.closest(".card").querySelector(".card-t a").firstChild.textContent);
-
-  const item = {id: "u" + Date.now().toString(36), sec: fSec.value, group, n, p, d};
-  edits.added.push(item);
-  saveEdits();
-
-  const secEl = document.getElementById(item.sec);
-  let gEl = [...secEl.querySelectorAll(".group")].find(g => g.dataset.group === group);
-  if (!gEl) {
-    const note = secEl.querySelector(".note");
-    (note || secEl).insertAdjacentHTML(note ? "beforebegin" : "beforeend", groupHTML(item.sec, group, group, ""));
-    gEl = [...secEl.querySelectorAll(".group")].find(g => g.dataset.group === group);
-  }
-  gEl.querySelector(".add-card").insertAdjacentHTML("beforebegin", cardHTML(n, p, d, item.id, true));
-  const card = gEl.querySelector(`.card[data-key="${item.id}"]`);
-  card.classList.add("vis", "new");
-  dlg.close();
-  card.scrollIntoView({block: "center", behavior: "smooth"});
-  updateCount();
-  toast(T("added", n));
-});
-
-// export / import / reset
 function saveFile(name, text, type) {
   const a = document.createElement("a");
   a.href = URL.createObjectURL(new Blob([text], {type})); a.download = name;
   document.body.appendChild(a); a.click(); a.remove();
   setTimeout(() => URL.revokeObjectURL(a.href), 5000);
 }
-document.getElementById("expBtn").onclick = () => {
-  saveFile("toolbox-edits.json", JSON.stringify({app: "windows-toolbox", version: 1, ...edits}, null, 2), "application/json");
-  toast(T("exported"));
-};
-const impFile = document.getElementById("impFile");
-document.getElementById("impBtn").onclick = () => impFile.click();
-impFile.onchange = async () => {
-  const f = impFile.files[0]; impFile.value = ""; if (!f) return;
-  try {
-    const j = JSON.parse(await f.text());
-    const str = v => typeof v === "string" ? v.slice(0, 300) : "";
-    const next = {
-      removed: (j.removed || []).filter(k => typeof k === "string"),
-      added: (j.added || []).filter(a => a && a.n && a.p && a.sec && a.group && normSrc(String(a.p)))
-        .map((a, i) => ({id: str(a.id) || "u" + Date.now().toString(36) + i, sec: str(a.sec), group: str(a.group), n: str(a.n), p: normSrc(String(a.p)), d: str(a.d)}))
-    };
-    if (!Array.isArray(j.removed) && !Array.isArray(j.added)) throw 0;
-    edits = next; saveEdits(); location.reload();
-  } catch { toast(T("importErr")); }
-};
-document.getElementById("resetBtn").onclick = () => {
-  if (!edits.removed.length && !edits.added.length) return toast(T("resetNone"));
-  if (!confirm(T("resetConfirm"))) return;
-  edits = {removed: [], added: []}; saveEdits(); location.reload();
-};
 
 // ---- select mode, sets, install script -----------------------------------------------------
 const selBtn = document.getElementById("selBtn");
@@ -1064,14 +699,21 @@ function setSelecting(on) {
   updateSel();
 }
 function updateSel() {
-  selBtn.textContent = document.body.classList.contains("selecting") ? T("selectDone") : T("select");
+  const on = document.body.classList.contains("selecting");
+  selBtn.innerHTML = `<span aria-hidden="true">☑</span> <span class="t">${esc(on ? T("selectDone") : T("select"))}</span>`;
+  selBtn.setAttribute("aria-pressed", String(on));
   document.getElementById("selCount").textContent = T("selCount", selected.size);
+  const its = [...selected].map(k => APPS.get(k)).filter(Boolean);
+  const todo = its.filter(it => canInstall(it) && !W.installed.has(it.w.toLowerCase()));
   const inst = document.getElementById("selInstall");
-  const todo = [...selected].map(k => APPS.get(k)).filter(it => canInstall(it) && !W.installed.has(it.w.toLowerCase()));
   inst.hidden = !(HOST && W.available);
   inst.textContent = T("installAll", todo.length);
   inst.disabled = !todo.length;
   ["selScript", "selSave", "selShare", "selClear"].forEach(id => document.getElementById(id).disabled = !selected.size);
+  // the live command: what "Script" would run for the current picks
+  const cmd = document.getElementById("selCmd"), wg = its.filter(it => it.w);
+  cmd.textContent = wg.length ? wg.map(it => "winget install --id " + it.w).join("; ") : T("previewEmpty");
+  cmd.classList.toggle("idle", !wg.length);
 }
 selBtn.onclick = () => setSelecting(!document.body.classList.contains("selecting"));
 document.addEventListener("change", e => {
@@ -1206,7 +848,7 @@ const newer = (a, b) => { const x = semver(a), y = semver(b); for (let i = 0; i 
 if (appv && !HOST && !/dev/.test(appv)) {
   // older exe (≤ 1.1) without a host bridge: just point to the new release.
   // latest.json is a plain file (no API rate limit); the GitHub API is the fallback.
-  fetch(`https://raw.githubusercontent.com/${REPO}/main/latest.json?t=${Date.now()}`).then(r => r.ok ? r.json() : Promise.reject())
+  fetch(`${SITE}latest.json?t=${Date.now()}`).then(r => r.ok ? r.json() : Promise.reject())
     .catch(() => gh(REPO + "/releases/latest").then(r => r.ok ? r.json() : null).then(rel => {
       if (!rel) return null;
       const exe = (rel.assets || []).find(a => /\.exe$/i.test(a.name));
@@ -1252,7 +894,6 @@ document.getElementById("lang").addEventListener("click", e => {
   lang = b.dataset.l;
   try { localStorage.setItem("toolbox.lang", lang); } catch {}
   rerender();
-  main.classList.remove("swap"); void main.offsetWidth; main.classList.add("swap");
   send({cmd: "lang", lang});
 });
 
@@ -1260,12 +901,12 @@ document.getElementById("lang").addEventListener("click", e => {
 const root = document.documentElement, tb = document.getElementById("theme");
 const setTheme = t => { root.dataset.theme = t; tb.textContent = t === "light" ? "☾" : "☀"; try { localStorage.setItem("theme", t); } catch {} };
 let saved = null; try { saved = localStorage.getItem("theme"); } catch {}
-setTheme(saved || (matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark"));
+setTheme(saved === "light" || saved === "dark" ? saved : (matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark"));
 tb.onclick = () => setTheme(root.dataset.theme === "light" ? "dark" : "light");
 
-updateEditInfo();
 updateSel();
-document.body.dataset.ready = "1";   // checked by tools/check-page.mjs
+onScroll();
+document.body.dataset.ready = "1";   // checked by tools/check-page.mjs and tools/test-ui.mjs
 })();
 </script>
 </body>
