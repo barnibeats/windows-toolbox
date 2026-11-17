@@ -6,7 +6,13 @@
   "scripts": {
     "check": "node tools/build.mjs --check",
     "build": "node tools/build.mjs",
-    "test": "npm run check && npm run build && node tools/check-page.mjs"
+    "test": "npm run check && npm run build && node tools/check-page.mjs && npm run test:ui",
+    "test:ui": "node --test tools/test-ui.mjs"
   },
-  "engines": { "node": ">=22" }
+  "engines": {
+    "node": ">=22"
+  },
+  "devDependencies": {
+    "playwright-core": "^1.65.1"
+  }
 }
