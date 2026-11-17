@@ -1,0 +1,66 @@
+# Pushing a tag like v1.3.1 builds WindowsToolbox.exe and publishes a release with it.
+# Installed apps then pick the new version up from latest.json on GitHub Pages.
+#
+# Optional code signing (Azure Trusted Signing): set the secrets AZURE_TENANT_ID, AZURE_CLIENT_ID,
+# AZURE_CLIENT_SECRET, AZURE_SIGNING_ENDPOINT, AZURE_SIGNING_ACCOUNT, AZURE_CERT_PROFILE.
+# Without them the exe is published unsigned. A signed app only accepts updates signed by the same publisher.
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+  actions: write
+
+jobs:
+  release:
+    runs-on: windows-latest
+    env:
+      AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Build WindowsToolbox.exe
+        shell: powershell
+        run: .\app\build.ps1 -Version "${{ github.ref_name }}" -Repo "${{ github.repository }}"
+
+      - name: Sign (Azure Trusted Signing)
+        if: env.AZURE_CLIENT_ID != ''
+        uses: azure/trusted-signing-action@v0.5.1
+        with:
+          azure-tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          azure-client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          azure-client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
+          endpoint: ${{ secrets.AZURE_SIGNING_ENDPOINT }}
+          trusted-signing-account-name: ${{ secrets.AZURE_SIGNING_ACCOUNT }}
+          certificate-profile-name: ${{ secrets.AZURE_CERT_PROFILE }}
+          files-folder: ${{ github.workspace }}
+          files-folder-filter: exe
+          file-digest: SHA256
+          timestamp-rfc3161: http://timestamp.acs.microsoft.com
+          timestamp-digest: SHA256
+
+      - name: winget manifests
+        shell: powershell
+        run: |
+          .\tools\winget-manifest.ps1 -Version "${{ github.ref_name }}" -Repo "${{ github.repository }}" -Exe WindowsToolbox.exe -Out winget
+          Compress-Archive -Path winget\* -DestinationPath winget-manifests.zip
+
+      - name: Publish the release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "$GITHUB_REF_NAME" WindowsToolbox.exe winget-manifests.zip --verify-tag --title "Windows Toolbox $GITHUB_REF_NAME" --generate-notes
+
+      # Events created with GITHUB_TOKEN do not start other workflows, so ask for the Pages run explicitly.
+      - name: Refresh GitHub Pages (latest.json)
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run pages.yml
