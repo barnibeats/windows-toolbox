@@ -60,3 +60,12 @@ test("group note: complete passes, missing languages fail only under --strict, m
   assert.equal(run(partial, "--strict").code, 1);
   assert.equal(run(catalogWith([entry()], { note: { en: "x", uk: "x" } })).code, 1);
 });
+
+test("aka: a list of old repo keys that must not collide with any entry's repo", () => {
+  const other = (n, extra = {}) => entry({ n, r: `owner/${n.toLowerCase()}`, w: `Owner.${n}`, ...extra });
+  assert.equal(run(catalogWith([entry({ aka: ["old/app"] })]), "--strict").code, 0);
+  assert.equal(run(catalogWith([entry({ aka: "old/app" })])).code, 1, "not a list");
+  assert.equal(run(catalogWith([entry(), other("Other", { aka: ["owner/app"] })])).code, 1, "collides with another repo");
+  assert.equal(run(catalogWith([entry({ aka: ["Owner/App"] })])).code, 1, "its own key in any case");
+  assert.equal(run(catalogWith([entry(), other("Second", { aka: ["old/x"] }), other("Third", { aka: ["OLD/X"] })])).code, 1, "same alias twice");
+});

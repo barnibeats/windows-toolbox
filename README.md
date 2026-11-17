@@ -18,8 +18,8 @@ Prefer the browser? Open the [web version](https://barnibeats.github.io/windows-
 ## What you can do
 
 - **Find an app.** Search all apps at once, or jump between sections. Press `/` to focus the search.
-- **Download in one click.** Every app links straight to the Windows file of its latest GitHub release. Links, stars and release dates are refreshed every day.
-- **Install with winget.** In the desktop app, apps that are in winget install silently with one click. Installed apps and available updates are marked. Windows asks you to confirm every install.
+- **Download in one click.** Most apps link straight to the Windows file of their latest GitHub release. For the rest, the button opens the download page. Links, stars and release dates are refreshed every day.
+- **Install with winget.** In the desktop app, apps that are in winget install silently with one click. Installed apps and available updates are marked. The app asks you to confirm every install in a Windows dialog.
 - **Build a set.** Press Select, tick several apps, then install them together, save the set, share it as a link or export a PowerShell script.
 - **Stay up to date.** The catalog refreshes on every launch, and the app installs its own new versions when you close it. Without a connection it shows the last saved copy.
 

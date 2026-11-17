@@ -346,3 +346,41 @@ test("tricks and safety sections render every entry and the copy button copies t
   assert.equal(await t.clip(), catalog.cmds[0].c.en);
   await t.close();
 });
+
+// ---- 19-20 fixes from the final review ---------------------------------------------------------
+const moved = items.filter(i => i.aka && i.aka.length);
+test("old repo keys (aka) still work in share links and saved sets, in any letter case", async () => {
+  assert.ok(moved.length >= 1, "the catalog lists at least one moved app");
+  const M = moved[0], oldKey = M.aka[0];
+  const t = await openPage({ hash: `#set=${encodeURIComponent(oldKey)},${encodeURIComponent(A.r)}` });
+  assert.equal(await t.page.locator("div.card.picked").count(), 2);
+  assert.ok(await card(t.page, M.r).evaluate(el => el.classList.contains("picked")), "the moved app is picked under its new key");
+  await t.close();
+
+  const sets = JSON.stringify([{ name: "old", keys: [oldKey.toUpperCase(), A.r] }]);
+  const t2 = await openPage({ storage: { "toolbox.sets.v1": sets } });
+  await t2.page.click("#selBtn");
+  await t2.page.click("#selSets");
+  await t2.page.click("#setList [data-load]");
+  assert.equal(await t2.page.locator("div.card.picked").count(), 2);
+  await t2.close();
+});
+
+test("keyboard focus is visible on the set bar and on command blocks, in both themes", async () => {
+  for (const theme of ["light", "dark"]) {
+    const t = await openPage({ storage: { theme } });
+    await pick(t, A);
+    for (const [target, container] of [["#selScript", "#selbar"], [".cmd .copy", ".cmd"]]) {
+      await t.page.locator(target).first().focus();
+      await t.page.keyboard.press("Shift+Tab");
+      await t.page.keyboard.press("Tab");   // arrived by keyboard, so :focus-visible applies
+      const r = await t.page.evaluate(([c]) => {
+        const el = document.activeElement, cs = getComputedStyle(el), bg = getComputedStyle(document.querySelector(c));
+        return { tag: el.className + el.id, outline: cs.outlineColor, style: cs.outlineStyle, bg: bg.backgroundColor };
+      }, [container]);
+      assert.equal(r.style, "solid", `${theme} ${target}: focus ring drawn (${r.tag})`);
+      assert.notEqual(r.outline, r.bg, `${theme} ${target}: outline ${r.outline} on ${r.bg}`);
+    }
+    await t.close();
+  }
+});
